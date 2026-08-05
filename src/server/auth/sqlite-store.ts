@@ -1,12 +1,17 @@
 import { randomUUID } from "node:crypto";
-import type BetterSqlite3 from "better-sqlite3";
 import type { AuthenticatedUser, Role } from "../../shared/auth.js";
 import type { AuthStore } from "./types.js";
 
 type Row = Record<string, unknown>;
+type Statement = {
+  get(...parameters: unknown[]): unknown;
+  all(...parameters: unknown[]): unknown[];
+  run(...parameters: unknown[]): unknown;
+};
+export type SqliteDatabase = { exec(sql: string): unknown; prepare(sql: string): Statement };
 
 export class SqliteAuthStore implements AuthStore {
-  constructor(private readonly db: BetterSqlite3.Database) {}
+  constructor(private readonly db: SqliteDatabase) {}
 
   async findLogin(email: string) {
     const row = this.db.prepare(`SELECT u.id user_id,u.email,u.first_name,u.last_name,u.password_hash,
