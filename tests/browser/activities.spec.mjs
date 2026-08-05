@@ -38,6 +38,22 @@ test("member records a meeting and transactional follow-up in the real product",
       .filter({ hasText: "Browser renewal meeting" })
       .getByRole("link", { name: "Open linked follow-up" }),
   ).toBeVisible();
+  const activity = page
+    .locator("article")
+    .filter({ hasText: "Browser renewal meeting" });
+  await activity.getByRole("button", { name: "Edit" }).click();
+  await page.getByLabel("Subject *").fill("Browser renewal meeting revised");
+  await page.getByLabel("Summary").fill("Revised proposal was delivered.");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Browser renewal meeting revised")).toBeVisible();
+  const revised = page
+    .locator("article")
+    .filter({ hasText: "Browser renewal meeting revised" });
+  await revised.getByRole("button", { name: "Delete" }).click();
+  await page.getByRole("button", { name: "Delete activity" }).click();
+  await expect(page.getByText("Browser renewal meeting revised")).toHaveCount(
+    0,
+  );
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
@@ -50,6 +66,8 @@ test("viewer can read the timeline but cannot record activity", async ({
   await expect(
     page.getByRole("button", { name: "Record activity" }),
   ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Edit" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
   await expect(
     page.getByText("Historical interaction 1", { exact: true }),
   ).toBeVisible();

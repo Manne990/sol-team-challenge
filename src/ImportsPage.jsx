@@ -36,6 +36,21 @@ export function ImportsPage({ role }) {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [result, setResult] = useState(null);
+  const companyFilters = new URLSearchParams(
+    sessionStorage.getItem("northstar:company-filters") || "",
+  );
+  const contactFilters = new URLSearchParams(
+    sessionStorage.getItem("northstar:contact-filters") || "",
+  );
+  for (const filters of [companyFilters, contactFilters]) {
+    filters.delete("page");
+    filters.delete("pageSize");
+    filters.delete("sort");
+    filters.delete("order");
+    filters.delete("direction");
+  }
+  const companyExport = `/api/imports/export/companies${companyFilters.size ? `?${companyFilters}` : ""}`;
+  const contactExport = `/api/imports/export/contacts${contactFilters.size ? `?${contactFilters}` : ""}`;
   const canImport = role !== "viewer";
   function choose(event) {
     const file = event.target.files?.[0];
@@ -121,16 +136,10 @@ export function ImportsPage({ role }) {
           </div>
         </div>
         <div className="import-actions">
-          <a
-            className="button button--quiet"
-            href="/api/imports/export/companies"
-          >
+          <a className="button button--quiet" href={companyExport}>
             Export companies
           </a>
-          <a
-            className="button button--quiet"
-            href="/api/imports/export/contacts"
-          >
+          <a className="button button--quiet" href={contactExport}>
             Export contacts
           </a>
         </div>

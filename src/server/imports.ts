@@ -453,15 +453,47 @@ export function importsRouter(db: SqliteDatabase, auth: AuthService) {
       if (!fields[resource])
         throw new AuthError(404, "NOT_FOUND", "Export not found.");
       const params: unknown[] = [user.organization.id],
-        where = ["organization_id=?", "archived_at IS NULL"];
+        where = ["organization_id=?"];
+      if (
+        (resource === "companies" && req.query.includeArchived !== "true") ||
+        (resource === "contacts" && req.query.archived !== "true")
+      )
+        where.push("archived_at IS NULL");
       if (resource === "companies") {
         if (typeof req.query.lifecycle === "string" && req.query.lifecycle) {
           where.push("lifecycle_status=?");
           params.push(req.query.lifecycle);
         }
         if (typeof req.query.q === "string" && req.query.q) {
-          where.push("name LIKE ?");
-          params.push(`%${req.query.q}%`);
+          where.push(
+            "(name LIKE ? OR organization_number LIKE ? OR external_reference LIKE ?)",
+          );
+          const q = `%${req.query.q.trim()}%`;
+          params.push(q, q, q);
+        }
+        for (const [key, column] of [
+          ["industry", "industry"],
+          ["size", "size"],
+          ["owner", "owner_membership_id"],
+        ] as const)
+          if (typeof req.query[key] === "string" && req.query[key]) {
+            where.push(`${column}=?`);
+            params.push(req.query[key]);
+          }
+        if (typeof req.query.tag === "string" && req.query.tag) {
+          where.push(
+            "EXISTS(SELECT 1 FROM json_each(tags_json) WHERE value=?)",
+          );
+          params.push(req.query.tag);
+        }
+        if (
+          typeof req.query.lastActivityBefore === "string" &&
+          req.query.lastActivityBefore
+        ) {
+          where.push(
+            "NOT EXISTS(SELECT 1 FROM activities a WHERE a.organization_id=companies.organization_id AND a.company_id=companies.id AND a.occurred_at>=?)",
+          );
+          params.push(req.query.lastActivityBefore);
         }
         const rows = db
           .prepare(
@@ -497,6 +529,25 @@ export function importsRouter(db: SqliteDatabase, auth: AuthService) {
       if (typeof req.query.status === "string" && req.query.status) {
         where.push("status=?");
         params.push(req.query.status);
+      }
+      if (typeof req.query.q === "string" && req.query.q.trim()) {
+        where.push(
+          "(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR (first_name || ' ' || last_name) LIKE ?)",
+        );
+        const q = `%${req.query.q.trim()}%`;
+        params.push(q, q, q, q);
+      }
+      for (const [key, column] of [
+        ["companyId", "company_id"],
+        ["ownerId", "owner_membership_id"],
+      ] as const)
+        if (typeof req.query[key] === "string" && req.query[key]) {
+          where.push(`${column}=?`);
+          params.push(req.query[key]);
+        }
+      if (typeof req.query.tag === "string" && req.query.tag) {
+        where.push("EXISTS(SELECT 1 FROM json_each(tags_json) WHERE value=?)");
+        params.push(req.query.tag);
       }
       const rows = db
         .prepare(
