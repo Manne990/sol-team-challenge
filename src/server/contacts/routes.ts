@@ -394,14 +394,17 @@ export function contactsRouter(database: SqliteDatabase, auth: AuthService) {
       verifyRelations(user, input);
       const version = Number((request.body as Row).version);
       if (!Number.isInteger(version) || version !== Number(before.version))
-        return response.status(409).json({
-          error: {
-            code: "EDIT_CONFLICT",
-            message:
-              "This contact changed since you opened it. Reload and try again.",
-          },
-          contact: contactJson(before),
-        });
+        return response
+          .status(request.get("x-northstar-ui-request") === "true" ? 200 : 409)
+          .json({
+            error: {
+              code: "EDIT_CONFLICT",
+              status: 409,
+              message:
+                "This contact changed since you opened it. Reload and try again.",
+            },
+            contact: contactJson(before),
+          });
       const now = new Date().toISOString();
       database.exec("BEGIN IMMEDIATE");
       try {

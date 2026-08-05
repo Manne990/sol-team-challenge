@@ -35,7 +35,7 @@ async function api(path, options) {
     const error = new Error(
       body?.error?.message || "Northstar could not complete that request.",
     );
-    error.status = response.status;
+    error.status = body?.error?.status || response.status;
     error.body = body;
     throw error;
   }
