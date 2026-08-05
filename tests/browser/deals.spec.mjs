@@ -56,6 +56,11 @@ test("member creates, scans, moves, loses, and reopens a deal without drag", asy
 test("viewer sees list and pipeline but no deal mutation controls or foreign detail", async ({
   page,
 }) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
   await signIn(page, "viewer@northstar.test", "ViewerPass!2026");
   await page.getByRole("link", { name: "Deals", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Deals" })).toBeVisible();
@@ -66,4 +71,5 @@ test("viewer sees list and pipeline but no deal mutation controls or foreign det
   await expect(
     page.getByRole("heading", { name: "Record not found" }),
   ).toBeVisible();
+  expect(failures).toEqual([]);
 });
