@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("member creates, completes, archives, and restores a related UTC task", async ({ page }) => {
+  const title = `Browser renewal briefing ${Date.now()}`;
   await page.goto("/");
   await page.getByLabel("Email address").fill("member@northstar.test");
   await page.getByLabel("Password").fill("MemberPass!2026");
@@ -10,23 +11,25 @@ test("member creates, completes, archives, and restores a related UTC task", asy
   await expect(page.getByRole("heading", { name: "Tasks" })).toBeVisible();
   await page.getByRole("button", { name: "Add task" }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Title *").fill("Browser renewal briefing");
+  await dialog.getByLabel("Title *").fill(title);
   await dialog.getByLabel("Assignee *").selectOption("mem_member");
   await dialog.getByLabel("Priority").selectOption("urgent");
   await dialog.getByLabel("Due at (UTC)").fill("2026-08-06T09:00");
   await dialog.getByLabel("Company ID").fill("cmp_0001_northstar");
   await dialog.getByLabel("Description").fill("Created by the task browser workflow.");
   await dialog.getByRole("button", { name: "Save task" }).click();
-  const openRow = page.getByRole("row").filter({ hasText: "Browser renewal briefing" });
+  const openRow = page.getByRole("row").filter({ hasText: title });
   await expect(openRow).toContainText(/urgent/i);
   await expect(openRow).toContainText("Northstar Account 1");
   await openRow.getByRole("button", { name: "Complete" }).click();
+  await expect(openRow).toHaveCount(0);
   await page.getByRole("button", { name: "Completed" }).click();
-  const completedRow = page.getByRole("row").filter({ hasText: "Browser renewal briefing" });
+  const completedRow = page.getByRole("row").filter({ hasText: title });
   await expect(completedRow).toContainText("completed");
   await completedRow.getByRole("button", { name: "Archive" }).click();
+  await expect(completedRow).toHaveCount(0);
   await page.getByRole("button", { name: "Archived" }).click();
-  const archivedRow = page.getByRole("row").filter({ hasText: "Browser renewal briefing" });
+  const archivedRow = page.getByRole("row").filter({ hasText: title });
   await expect(archivedRow).toBeVisible();
   await archivedRow.getByRole("button", { name: "Restore" }).click();
   await expect(archivedRow).toHaveCount(0);
