@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
-import { DatabaseSync } from "node:sqlite";
+import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 import { SqliteAuthStore, type SqliteDatabase } from "./sqlite-store.js";
 
 function fixture() {
-  const db = new DatabaseSync(":memory:");
+  const db = new Database(":memory:");
   db.exec("PRAGMA foreign_keys=ON");
   db.exec(readFileSync("migrations/001_initial.sql", "utf8"));
   const now = "2026-08-05T12:00:00.000Z";
