@@ -49,6 +49,33 @@ test("member creates, reads, archives, and restores a complete company", async (
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
+test("cross-tenant company owner validation is console-clean and atomic", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await signIn(page, "member@northstar.test", "MemberPass!2026");
+  await page.getByRole("link", { name: "Companies" }).click();
+  const before = await page.evaluate(
+    async () => (await (await fetch("/api/companies?pageSize=1")).json()).total,
+  );
+  await page.getByRole("button", { name: "Add company" }).click();
+  await page.getByLabel("Name *").fill("Referee Invalid Owner Browser");
+  await page.getByLabel("Owner membership ID").fill("mem_outside");
+  await page.getByRole("button", { name: "Save company" }).click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "Choose an active owner in your organization.",
+  );
+  const after = await page.evaluate(
+    async () => (await (await fetch("/api/companies?pageSize=1")).json()).total,
+  );
+  expect(after).toBe(before);
+  expect(failures).toEqual([]);
+});
+
 test("viewer can scan companies but cannot mutate or discover a foreign id", async ({
   page,
 }) => {
