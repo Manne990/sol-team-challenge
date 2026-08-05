@@ -14,21 +14,32 @@ export function hashSessionSecret(secret: string): string {
 export function constantTimeEqual(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
   const rightBuffer = Buffer.from(right);
-  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+  return (
+    leftBuffer.length === rightBuffer.length &&
+    timingSafeEqual(leftBuffer, rightBuffer)
+  );
 }
 
-export function readCookie(header: string | undefined, name: string): string | undefined {
+export function readCookie(
+  header: string | undefined,
+  name: string,
+): string | undefined {
   if (!header) return undefined;
   for (const segment of header.split(";")) {
     const separator = segment.indexOf("=");
     if (separator < 0) continue;
     const key = segment.slice(0, separator).trim();
-    if (key === name) return decodeURIComponent(segment.slice(separator + 1).trim());
+    if (key === name)
+      return decodeURIComponent(segment.slice(separator + 1).trim());
   }
   return undefined;
 }
 
-export function sessionCookie(secret: string, expiresAt: Date, secure: boolean): string {
+export function sessionCookie(
+  secret: string,
+  expiresAt: Date,
+  secure: boolean,
+): string {
   return `${SESSION_COOKIE}=${encodeURIComponent(secret)}; Path=/; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}${secure ? "; Secure" : ""}`;
 }
 
