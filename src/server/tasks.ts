@@ -242,7 +242,11 @@ export class TaskStore {
           user,
           "task.updated",
           taskId,
-          { version: expectedVersion },
+          {
+            version: expectedVersion,
+            fromAssigneeMembershipId: existing.assignee.id,
+            toAssigneeMembershipId: data.assigneeMembershipId,
+          },
           now,
         );
       } else {
