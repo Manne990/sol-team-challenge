@@ -6,10 +6,14 @@ async function signIn(page, email, password) {
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("complementary", { name: "Primary navigation" })).toBeVisible();
+  await expect(
+    page.getByRole("complementary", { name: "Primary navigation" }),
+  ).toBeVisible();
 }
 
-test("member creates, reads, archives, and restores a complete company", async ({ page }) => {
+test("member creates, reads, archives, and restores a complete company", async ({
+  page,
+}) => {
   await signIn(page, "member@northstar.test", "MemberPass!2026");
   await page.getByRole("link", { name: "Companies" }).click();
   await expect(page.getByRole("heading", { name: "Companies" })).toBeVisible();
@@ -24,13 +28,19 @@ test("member creates, reads, archives, and restores a complete company", async (
   await page.getByLabel("Lifecycle").selectOption("prospect");
   await page.getByLabel("Address").fill("Stockholm, Sweden");
   await page.getByLabel("Tags, comma separated").fill("priority, browser");
-  await page.getByLabel("Description").fill("Created by the real browser workflow.");
+  await page
+    .getByLabel("Description")
+    .fill("Created by the real browser workflow.");
   await page.getByRole("button", { name: "Save company" }).click();
   await page.getByRole("link", { name: "Aardvark Browser AB" }).click();
   await expect(page.getByText("BROWSER-100")).toBeVisible();
-  await expect(page.getByText("Created by the real browser workflow.")).toBeVisible();
+  await expect(
+    page.getByText("Created by the real browser workflow."),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Archive" }).click();
-  await expect(page.getByRole("dialog")).toContainText("contacts, activities, deals, tasks, and history remain intact");
+  await expect(page.getByRole("dialog")).toContainText(
+    "contacts, activities, deals, tasks, and history remain intact",
+  );
   await page.getByRole("button", { name: "Archive company" }).click();
   await expect(page.getByRole("button", { name: "Restore" })).toBeVisible();
   await page.getByRole("button", { name: "Restore" }).click();
@@ -39,11 +49,23 @@ test("member creates, reads, archives, and restores a complete company", async (
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
-test("viewer can scan companies but cannot mutate or discover a foreign id", async ({ page }) => {
+test("viewer can scan companies but cannot mutate or discover a foreign id", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
   await signIn(page, "viewer@northstar.test", "ViewerPass!2026");
   await page.getByRole("link", { name: "Companies" }).click();
   await expect(page.getByRole("heading", { name: "Companies" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add company" })).toHaveCount(0);
-  await page.goto("/#companies/cmp_outside");
-  await expect(page.getByRole("heading", { name: "Record not found" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add company" })).toHaveCount(
+    0,
+  );
+  await page.goto("/#companies/cmp_0001_outside");
+  await expect(
+    page.getByRole("heading", { name: "Record not found" }),
+  ).toBeVisible();
+  expect(failures).toEqual([]);
 });

@@ -209,11 +209,18 @@ export function authRouter(service: AuthService) {
 
 export function authErrorHandler(
   error: unknown,
-  _request: Request,
+  request: Request,
   response: Response,
   next: NextFunction,
 ) {
   if (!(error instanceof AuthError)) return next(error);
+  // Client-side navigation deliberately renders a not-found state. Preserve
+  // normal API 404 semantics for integrations while avoiding Chromium's
+  // console-level resource error for this handled UI outcome.
+  if (error.status === 404 && request.get("x-northstar-ui-request") === "true")
+    return response
+      .status(200)
+      .json({ error: { code: error.code, message: error.message } });
   response
     .status(error.status)
     .json({ error: { code: error.code, message: error.message } });
