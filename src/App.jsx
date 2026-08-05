@@ -12,6 +12,7 @@ import { ContactsPage } from "./ContactsPage.jsx";
 import { ImportsPage } from "./ImportsPage.jsx";
 import { TasksPage } from "./TasksPage.jsx";
 import { ActivitiesPage } from "./ActivitiesPage.jsx";
+import { DealsPage } from "./DealsPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -88,7 +89,8 @@ export function App({ role = "owner", user, onSignOut }) {
     companyId = route.startsWith("companies/")
       ? route.split(/[/?]/)[1]
       : undefined,
-    routeQuery = new URLSearchParams(route.split("?")[1] || "");
+    routeQuery = new URLSearchParams(route.split("?")[1] || ""),
+    dealId = route.startsWith("deals/") ? route.split(/[/?]/)[1] : undefined;
   const visibleNavigation = navigation.filter(
     ([, , requiredRole]) => !requiredRole || role === requiredRole,
   );
@@ -185,6 +187,8 @@ export function App({ role = "owner", user, onSignOut }) {
             user={user}
             companyId={routeQuery.get("companyId") || ""}
           />
+        ) : section === "deals" ? (
+          <DealsPage key={route} role={role} user={user} dealId={dealId} />
         ) : (
           <>
             <div className="page-heading">
