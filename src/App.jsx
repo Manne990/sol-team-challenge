@@ -18,7 +18,7 @@ const columns = [
   { key: 'owner', label: 'Owner' }, { key: 'stage', label: 'Stage' }, { key: 'value', label: 'Pipeline value' }, { key: 'activity', label: 'Last activity' },
 ];
 
-export function App({ role = 'owner' }) {
+export function App({ role = 'owner', onSignOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [toast, setToast] = useState([]);
@@ -30,7 +30,7 @@ export function App({ role = 'owner' }) {
         <a className="brand" href="#dashboard" aria-label="Northstar CRM dashboard"><span aria-hidden="true">✦</span> Northstar</a>
         <label className="global-search"><span className="sr-only">Search CRM</span><span aria-hidden="true">⌕</span><input type="search" placeholder="Search companies, contacts, deals…" /></label>
         <button className="icon-button" aria-label="View notifications">♢<span className="notification-dot" /></button>
-        <button className="profile-button" aria-label="Open profile menu"><span>MC</span><span className="profile-copy">Maya Chen<small>{role}</small></span></button>
+        <button className="profile-button" aria-label={onSignOut ? 'Sign out' : 'Open profile menu'} onClick={onSignOut}><span>MC</span><span className="profile-copy">Maya Chen<small>{onSignOut ? 'Sign out' : role}</small></span></button>
       </header>
       <aside id="primary-navigation" className={`sidebar ${menuOpen ? 'sidebar--open' : ''}`} aria-label="Primary navigation">
         <nav>{visibleNavigation.map(([label, id]) => <a href={`#${id}`} className={id === 'dashboard' ? 'active' : ''} aria-current={id === 'dashboard' ? 'page' : undefined} key={id}><span aria-hidden="true">{icons[id]}</span>{label}</a>)}</nav>
