@@ -6,6 +6,7 @@ import {
   OperationalState,
   ToastRegion,
 } from "./components.jsx";
+import { SavedViews } from "./Discovery.jsx";
 
 const emptyForm = {
   firstName: "",
@@ -356,6 +357,24 @@ export function ContactsPage({ role }) {
           <Button onClick={() => setForm("create")}>+ Add contact</Button>
         )}
       </div>
+      <SavedViews
+        resource="contacts"
+        definition={filters}
+        onApply={(value) =>
+          setFilters({
+            q: "",
+            status: "",
+            tag: "",
+            companyId: "",
+            ownerId: "",
+            archived: "",
+            sort: "name",
+            direction: "asc",
+            page: 1,
+            ...value,
+          })
+        }
+      />
       <section className="panel">
         <div className="filters contact-filters">
           <label>

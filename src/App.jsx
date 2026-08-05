@@ -15,6 +15,7 @@ import { TasksPage } from "./TasksPage.jsx";
 import { ActivitiesPage } from "./ActivitiesPage.jsx";
 import { DealsPage } from "./DealsPage.jsx";
 import { NotificationsPanel } from "./NotificationsPanel.jsx";
+import { GlobalSearch } from "./Discovery.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -117,14 +118,7 @@ export function App({ role = "owner", user, onSignOut }) {
         >
           <span aria-hidden="true">✦</span> Northstar
         </a>
-        <label className="global-search">
-          <span className="sr-only">Search CRM</span>
-          <span aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            placeholder="Search companies, contacts, deals…"
-          />
-        </label>
+        <GlobalSearch />
         <NotificationsPanel />
         <button
           className="profile-button"
