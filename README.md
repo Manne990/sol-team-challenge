@@ -20,3 +20,24 @@ npm run dev -- --host 127.0.0.1 --port 4173
 
 The complete product must run locally without paid services or private secrets.
 Reality, CI, and external acceptance determine completion.
+
+## Local development
+
+Node.js 22 or newer is required. From a clean checkout:
+
+```bash
+npm ci
+npm run db:reset
+npm run db:seed
+npm run ci
+npm run dev -- --host 127.0.0.1 --port 4173
+```
+
+Open <http://127.0.0.1:4173>. Use `NORTHSTAR_DB_PATH` to keep the durable SQLite
+file elsewhere; its parent directory is created at startup. `NORTHSTAR_HOST`
+and `NORTHSTAR_PORT` provide environment-based defaults, while explicit CLI
+arguments win. Invalid configuration fails before the server listens.
+
+`npm run build` creates the production client and server in `dist`; run it with
+`npm start`. See [`docs/architecture.md`](docs/architecture.md) for boundaries,
+configuration, and feature extension points.
