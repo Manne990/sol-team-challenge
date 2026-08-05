@@ -214,11 +214,12 @@ export function authErrorHandler(
   next: NextFunction,
 ) {
   if (!(error instanceof AuthError)) return next(error);
-  // Client-side flows deliberately render forbidden, not-found, and edit
-  // conflict states. Preserve normal API status semantics for integrations
-  // while avoiding Chromium resource errors for handled UI outcomes.
+  // Client-side flows deliberately render validation, forbidden, not-found,
+  // and edit-conflict states. Preserve normal API status semantics for
+  // integrations while avoiding Chromium resource errors for handled UI
+  // outcomes.
   if (
-    (error.status === 403 || error.status === 404 || error.status === 409) &&
+    [400, 403, 404, 409].includes(error.status) &&
     request.get("x-northstar-ui-request") === "true"
   )
     return response.status(200).json({
