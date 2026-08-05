@@ -72,3 +72,34 @@ test("viewer can read the timeline but cannot record activity", async ({
     page.getByText("Historical interaction 1", { exact: true }),
   ).toBeVisible();
 });
+
+test("foreign activity relationships are rejected atomically without console errors", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await signIn(page, "member@northstar.test", "MemberPass!2026");
+  const before = await page.evaluate(
+    async () =>
+      (await (await fetch("/api/activities?pageSize=1")).json()).pagination
+        .total,
+  );
+  await page.getByRole("link", { name: "Activities" }).click();
+  await page.getByRole("button", { name: "Record activity" }).click();
+  await page.getByLabel("Subject *").fill("Referee Foreign Activity Browser");
+  await page.getByLabel("Company ID").fill("cmp_outside");
+  await page.getByRole("button", { name: "Record activity" }).click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "A related record is unavailable.",
+  );
+  const after = await page.evaluate(
+    async () =>
+      (await (await fetch("/api/activities?pageSize=1")).json()).pagination
+        .total,
+  );
+  expect(after).toBe(before);
+  expect(failures).toEqual([]);
+});

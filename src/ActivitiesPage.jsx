@@ -4,11 +4,14 @@ import { Button, Dialog, OperationalState } from "./components.jsx";
 async function api(path, options) {
   const response = await fetch(`/api/activities${path}`, {
     credentials: "same-origin",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-northstar-ui-request": "true",
+    },
     ...options,
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok)
+  if (!response.ok || body?.error)
     throw new Error(body?.error?.message || "Could not load activity history.");
   return body;
 }

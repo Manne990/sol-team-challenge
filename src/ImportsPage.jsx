@@ -83,11 +83,15 @@ export function ImportsPage({ role }) {
   async function request(path, options) {
     const response = await fetch(`/api/imports${path}`, {
       credentials: "same-origin",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-northstar-ui-request": "true",
+      },
       ...options,
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body?.error?.message || "Import failed.");
+    if (!response.ok || body?.error)
+      throw new Error(body?.error?.message || "Import failed.");
     return body;
   }
   async function previewRows() {

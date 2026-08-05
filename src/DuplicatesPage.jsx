@@ -3,11 +3,14 @@ import { Button, OperationalState } from "./components.jsx";
 const api = async (path, options) => {
   const response = await fetch(`/api/duplicates${path}`, {
     credentials: "same-origin",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-northstar-ui-request": "true",
+    },
     ...options,
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok)
+  if (!response.ok || body?.error)
     throw new Error(body?.error?.message || "Duplicate review failed.");
   return body;
 };

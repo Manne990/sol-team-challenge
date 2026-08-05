@@ -4,12 +4,15 @@ import { Button } from "./components.jsx";
 async function request(path, options) {
   const response = await fetch(path, {
     credentials: "same-origin",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-northstar-ui-request": "true",
+    },
     ...options,
   });
   if (response.status === 204) return {};
   const body = await response.json().catch(() => ({}));
-  if (!response.ok)
+  if (!response.ok || body?.error)
     throw new Error(body?.error?.message || "Could not complete the request.");
   return body;
 }
