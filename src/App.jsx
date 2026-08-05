@@ -9,6 +9,7 @@ import {
 } from "./components.jsx";
 import { CompaniesPage } from "./CompaniesPage.jsx";
 import { ContactsPage } from "./ContactsPage.jsx";
+import { ImportsPage } from "./ImportsPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -163,9 +164,16 @@ export function App({ role = "owner", user, onSignOut }) {
       )}
       <main id="main-content" className="content">
         {section === "companies" ? (
-          <CompaniesPage key={route} role={role} user={user} companyId={companyId} />
+          <CompaniesPage
+            key={route}
+            role={role}
+            user={user}
+            companyId={companyId}
+          />
         ) : section === "contacts" ? (
           <ContactsPage role={role} />
+        ) : section === "imports" ? (
+          <ImportsPage role={role} />
         ) : (
           <>
             <div className="page-heading">

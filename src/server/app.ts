@@ -10,6 +10,7 @@ import { AuthService } from "./auth/service.js";
 import { SqliteAuthStore } from "./auth/sqlite-store.js";
 import { companiesRouter } from "./companies.js";
 import { contactsRouter } from "./contacts/routes.js";
+import { importsRouter } from "./imports.js";
 
 export function createApp(database: SqliteDatabase) {
   const app = express();
@@ -19,6 +20,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/auth", authRouter(auth));
   app.use("/api/companies", companiesRouter(database, auth));
   app.use("/api/contacts", contactsRouter(database, auth));
+  app.use("/api/imports", importsRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {
