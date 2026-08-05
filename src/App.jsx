@@ -10,6 +10,7 @@ import {
 import { CompaniesPage } from "./CompaniesPage.jsx";
 import { ContactsPage } from "./ContactsPage.jsx";
 import { ImportsPage } from "./ImportsPage.jsx";
+import { TasksPage } from "./TasksPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -172,6 +173,8 @@ export function App({ role = "owner", user, onSignOut }) {
           />
         ) : section === "contacts" ? (
           <ContactsPage role={role} />
+        ) : section === "tasks" ? (
+          <TasksPage role={role} />
         ) : section === "imports" ? (
           <ImportsPage role={role} />
         ) : (
@@ -285,7 +288,7 @@ export function App({ role = "owner", user, onSignOut }) {
         onClose={() => setDialogOpen(false)}
         onConfirm={() => setDialogOpen(false)}
       />
-      {section !== "contacts" && (
+      {section !== "contacts" && section !== "tasks" && (
         <ToastRegion messages={toast} onDismiss={() => setToast([])} />
       )}
     </div>
