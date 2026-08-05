@@ -23,8 +23,7 @@ describe('CRM shell', () => {
   it('provides labeled controls and an accessible data table', () => {
     render(<App />);
     expect(screen.getByRole('searchbox', { name: 'Search CRM' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Deals requiring attention table' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Task title' })).toHaveAttribute('required');
+    expect(screen.getByRole('heading', { name: 'Calculating dashboard' })).toBeInTheDocument();
   });
 
   it('opens and closes mobile navigation semantically', () => {

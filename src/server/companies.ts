@@ -125,6 +125,14 @@ export class CompanyStore {
       const q = `%${query.q.trim()}%`;
       args.push(q, q, q);
     }
+    if (
+      typeof query.lastActivityBefore === "string" &&
+      query.lastActivityBefore
+    ) {
+      clauses.push(`NOT EXISTS(SELECT 1 FROM activities a WHERE a.organization_id=c.organization_id
+        AND a.company_id=c.id AND a.occurred_at>=?)`);
+      args.push(query.lastActivityBefore);
+    }
     const where = clauses.join(" AND "),
       sort = allowedSort.has(String(query.sort)) ? String(query.sort) : "name",
       direction = query.order === "desc" ? "DESC" : "ASC";

@@ -193,6 +193,7 @@ export function TasksPage({ role }) {
     assignedToMe: params.get("assignedToMe") || "",
     q: params.get("q") || "",
     priority: params.get("priority") || "",
+    dueBefore: params.get("dueBefore") || "",
     page: Number(params.get("page")) || 1,
   });
   const [state, setState] = useState({
@@ -369,6 +370,7 @@ export function TasksPage({ role }) {
             assignedToMe: "",
             q: "",
             priority: "",
+            dueBefore: "",
             page: 1,
             ...value,
           })
