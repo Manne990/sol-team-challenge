@@ -3,7 +3,9 @@ import { defineConfig } from "@playwright/test";
 const port = Number(process.env.NORTHSTAR_TEST_PORT);
 const databasePath = process.env.NORTHSTAR_TEST_DATABASE_PATH;
 if (!Number.isInteger(port) || !databasePath) {
-  throw new Error("Run browser tests through npm run test:browser to allocate isolated resources");
+  throw new Error(
+    "Run browser tests through npm run test:browser to allocate isolated resources",
+  );
 }
 
 export default defineConfig({
@@ -18,8 +20,13 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "node tests/browser/fixture-server.mjs",
-    env: { HOST: "127.0.0.1", PORT: String(port), DATABASE_PATH: databasePath },
+    command: "npm run db:reset && npm run db:seed && npm start",
+    env: {
+      NODE_ENV: "production",
+      NORTHSTAR_HOST: "127.0.0.1",
+      NORTHSTAR_PORT: String(port),
+      NORTHSTAR_DB_PATH: databasePath,
+    },
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: false,
     timeout: 30_000,
