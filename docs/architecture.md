@@ -26,6 +26,19 @@ without a due time remain open work but never appear in a time-bounded view.
 Completion and reopening set or clear `completed_at`; archiving is independent
 and preserves both the task's relationship history and completion state.
 
+## Notification policy
+
+Notification generation runs when a user lists notifications and is safe to
+replay. Assignment and deal-stage notifications use the immutable audit-event
+ID as their deduplication key. Approaching (next 24 hours) and overdue task
+notifications use task ID plus the exact due timestamp, so an unchanged task
+cannot notify twice while a rescheduled task receives a new policy window.
+Assignment recipients come from the event summary; task reminders go to the
+current active assignee; deal changes go to the current active deal owner.
+Read timestamps belong to one membership and are never shared. Notifications
+survive relation archival, but navigation is suppressed while the target is
+archived or otherwise unavailable.
+
 ## Runtime configuration
 
 | Setting     | CLI      | Environment         | Default                 |

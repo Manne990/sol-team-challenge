@@ -13,6 +13,7 @@ import { ImportsPage } from "./ImportsPage.jsx";
 import { TasksPage } from "./TasksPage.jsx";
 import { ActivitiesPage } from "./ActivitiesPage.jsx";
 import { DealsPage } from "./DealsPage.jsx";
+import { NotificationsPanel } from "./NotificationsPanel.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -121,9 +122,7 @@ export function App({ role = "owner", user, onSignOut }) {
             placeholder="Search companies, contacts, deals…"
           />
         </label>
-        <button className="icon-button" aria-label="View notifications">
-          ♢<span className="notification-dot" />
-        </button>
+        <NotificationsPanel />
         <button
           className="profile-button"
           aria-label={onSignOut ? "Sign out" : "Open profile menu"}
