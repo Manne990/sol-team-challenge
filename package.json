@@ -27,6 +27,7 @@
     "db:seed": "node scripts/db.mjs seed"
   },
   "dependencies": {
+    "argon2": "^0.44.0",
     "better-sqlite3": "^13.0.3",
     "express": "^5.2.1",
     "react": "^19.2.8",

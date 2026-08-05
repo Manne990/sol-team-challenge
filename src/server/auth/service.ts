@@ -43,6 +43,11 @@ export class AuthService {
     if (secret) await this.store.revokeSession(hashSessionSecret(secret), this.now().toISOString());
   }
 
+  async members(actor: AuthenticatedUser) {
+    this.requireRole(actor, ["owner"]);
+    return this.store.listMembers(actor.organization.id);
+  }
+
   requireRole(user: AuthenticatedUser | undefined, allowed: Role[]): AuthenticatedUser {
     if (!user) throw new AuthError(401, "AUTHENTICATION_REQUIRED", "Sign in to continue.");
     if (!allowed.includes(user.role)) throw new AuthError(403, "FORBIDDEN", "You do not have permission to do that.");
