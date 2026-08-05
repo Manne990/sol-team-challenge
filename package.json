@@ -4,13 +4,17 @@
   "private": true,
   "type": "module",
   "description": "Source-identical baseline for the SOL versus Gaia CRM challenge",
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
     "db:reset": "node scripts/baseline.mjs db-reset",
     "db:seed": "node scripts/baseline.mjs db-seed",
-    "ci": "vitest run",
+    "check:test-policy": "node scripts/check-test-policy.mjs",
+    "check:static": "node scripts/static-checks.mjs",
+    "test:component": "vitest run",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:integration": "node --test tests/integration/*.test.mjs",
+    "test:browser": "playwright install chromium && node scripts/run-browser-tests.mjs",
+    "ci": "npm run check:static && npm run check:test-policy && npm run test:component && npm run test:unit && npm run test:integration && npm run build && npm run test:browser",
     "build": "vite build",
     "dev": "vite"
   },
@@ -21,6 +25,8 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.54.2",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "jsdom": "latest",
