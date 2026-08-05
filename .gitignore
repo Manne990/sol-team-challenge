@@ -7,8 +7,11 @@ test-results/
 *.db
 *.db-shm
 *.db-wal
+data/
 *.sqlite
 *.sqlite3
+*.sqlite-shm
+*.sqlite-wal
 .env
 .env.*
 !.env.example
