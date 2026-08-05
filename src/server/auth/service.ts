@@ -196,6 +196,12 @@ export class AuthService {
     memberId: string,
   ): Promise<void> {
     this.requireRole(actor, ["owner"]);
+    if (memberId === actor.membershipId)
+      throw new AuthError(
+        409,
+        "SELF_REVOCATION",
+        "Ask another owner to revoke your access.",
+      );
     const result = await this.store.revokeMember({
       organizationId: actor.organization.id,
       memberId,

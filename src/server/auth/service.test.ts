@@ -119,5 +119,8 @@ describe("AuthService", () => {
     ).toThrowError(
       new AuthError(403, "FORBIDDEN", "You do not have permission to do that."),
     );
+    await expect(
+      service.revokeMember(owner, "member-owner"),
+    ).rejects.toMatchObject({ status: 409, code: "SELF_REVOCATION" });
   });
 });
