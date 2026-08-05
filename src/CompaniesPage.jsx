@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, DataTable, Dialog, OperationalState } from "./components.jsx";
+import { SavedViews } from "./Discovery.jsx";
 
 const empty = {
   name: "",
@@ -416,6 +417,15 @@ export function CompaniesPage({ role, user, companyId }) {
           <Button onClick={() => setEditing(true)}>+ Add company</Button>
         )}
       </div>
+      <SavedViews
+        resource="companies"
+        definition={Object.fromEntries(filters)}
+        onApply={(value) => {
+          const next = new URLSearchParams(value);
+          setFilters(next);
+          location.hash = `companies${next.size ? `?${next}` : ""}`;
+        }}
+      />
       <section className="panel">
         <div className="filters company-filters">
           <label>

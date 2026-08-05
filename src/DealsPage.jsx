@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, DataTable, Dialog, OperationalState } from "./components.jsx";
+import { SavedViews } from "./Discovery.jsx";
 
 async function api(path, options) {
   const response = await fetch(`/api/deals${path}`, {
@@ -565,6 +566,15 @@ export function DealsPage({ role, user, dealId }) {
           )}
         </div>
       </div>
+      <SavedViews
+        resource="deals"
+        definition={Object.fromEntries(filters)}
+        onApply={(value) => {
+          const next = new URLSearchParams(value);
+          setFilters(next);
+          location.hash = `deals${next.size ? `?${next}` : ""}`;
+        }}
+      />
       <section className="panel">
         <div className="filters deal-filters">
           <label>
