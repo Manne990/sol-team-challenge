@@ -11,6 +11,7 @@ import { SqliteAuthStore } from "./auth/sqlite-store.js";
 import { companiesRouter } from "./companies.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { importsRouter } from "./imports.js";
+import { mergesRouter } from "./merges.js";
 import { tasksRouter } from "./tasks.js";
 import { activitiesRouter } from "./activities.js";
 import { dealsRouter } from "./deals.js";
@@ -25,6 +26,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/companies", companiesRouter(database, auth));
   app.use("/api/contacts", contactsRouter(database, auth));
   app.use("/api/imports", importsRouter(database, auth));
+  app.use("/api/duplicates", mergesRouter(database, auth));
   app.use("/api/tasks", tasksRouter(database, auth));
   app.use("/api/activities", activitiesRouter(database, auth));
   app.use("/api/deals", dealsRouter(database, auth));
