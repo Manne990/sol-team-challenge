@@ -35,11 +35,14 @@ const columns = [
 async function api(path, options) {
   const response = await fetch(`/api/companies${path}`, {
     credentials: "same-origin",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-northstar-ui-request": "true",
+    },
     ...options,
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
+  if (!response.ok || body?.error) {
     const error = new Error(
       body?.error?.message || "Could not complete the request.",
     );
