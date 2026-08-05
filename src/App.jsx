@@ -10,6 +10,7 @@ import {
 import { CompaniesPage } from "./CompaniesPage.jsx";
 import { ContactsPage } from "./ContactsPage.jsx";
 import { ImportsPage } from "./ImportsPage.jsx";
+import { DuplicatesPage } from "./DuplicatesPage.jsx";
 import { TasksPage } from "./TasksPage.jsx";
 import { ActivitiesPage } from "./ActivitiesPage.jsx";
 import { DealsPage } from "./DealsPage.jsx";
@@ -22,6 +23,7 @@ export const navigation = [
   ["Deals", "deals"],
   ["Tasks", "tasks"],
   ["Imports", "imports"],
+  ["Duplicates", "duplicates"],
   ["Audit", "audit", "owner"],
   ["Administration", "administration", "owner"],
 ];
@@ -34,6 +36,7 @@ const icons = {
   deals: "◇",
   tasks: "✓",
   imports: "⇧",
+  duplicates: "≋",
   audit: "≣",
   administration: "⚙",
 };
@@ -181,6 +184,8 @@ export function App({ role = "owner", user, onSignOut }) {
           <TasksPage role={role} />
         ) : section === "imports" ? (
           <ImportsPage role={role} />
+        ) : section === "duplicates" ? (
+          <DuplicatesPage role={role} />
         ) : section === "activities" ? (
           <ActivitiesPage
             role={role}

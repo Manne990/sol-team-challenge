@@ -350,10 +350,22 @@ export function companiesRouter(db: SqliteDatabase, auth: AuthService) {
   });
   router.get("/:id", async (req, res, next) => {
     try {
-      const user = await actor(req),
-        item = store.detail(user.organization.id, String(req.params.id));
+      const user = await actor(req);
+      const requestedId = String(req.params.id);
+      const redirect = db
+        .prepare(
+          "SELECT survivor_id FROM merge_redirects WHERE organization_id=? AND entity_type='company' AND retired_id=?",
+        )
+        .get(user.organization.id, requestedId) as Row | undefined;
+      const item = store.detail(
+        user.organization.id,
+        redirect ? String(redirect.survivor_id) : requestedId,
+      );
       if (!item) throw new AuthError(404, "NOT_FOUND", "Company not found.");
-      res.json({ company: item });
+      res.json({
+        company: item,
+        redirectedFrom: redirect ? requestedId : null,
+      });
     } catch (e) {
       next(e);
     }
