@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, OperationalState } from "./components.jsx";
+import { Button, Dialog, OperationalState } from "./components.jsx";
 
 async function api(path, options) {
   const response = await fetch(`/api/activities${path}`, {
@@ -214,11 +214,74 @@ function ActivityForm({ user, onClose, onSaved }) {
   );
 }
 
+function EditActivityForm({ activity, onClose, onSaved }) {
+  const [subject, setSubject] = useState(activity.subject);
+  const [body, setBody] = useState(activity.body);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api(`/${activity.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ subject, body, version: activity.version }),
+      });
+      onSaved(result.activity);
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="panel activity-form">
+      <h2>Edit activity</h2>
+      <p>Historical time, type, creator, and relationships remain unchanged.</p>
+      {error && (
+        <div className="auth-error" role="alert">
+          {error}
+        </div>
+      )}
+      <form onSubmit={submit}>
+        <label>
+          Subject *
+          <input
+            required
+            maxLength="200"
+            value={subject}
+            onChange={(event) => setSubject(event.target.value)}
+          />
+        </label>
+        <label>
+          Summary
+          <textarea
+            maxLength="10000"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+          />
+        </label>
+        <div className="form-actions">
+          <Button type="button" variant="quiet" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 export function ActivitiesPage({ role, user, companyId = "" }) {
   const [state, setState] = useState({ status: "loading" });
   const [type, setType] = useState("");
   const [page, setPage] = useState(1);
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const load = () => {
     setState({ status: "loading" });
     const query = new URLSearchParams({ page: String(page), pageSize: "10" });
@@ -236,6 +299,17 @@ export function ActivitiesPage({ role, user, companyId = "" }) {
         onClose={() => setCreating(false)}
         onSaved={() => {
           setCreating(false);
+          load();
+        }}
+      />
+    );
+  if (editing)
+    return (
+      <EditActivityForm
+        activity={editing}
+        onClose={() => setEditing(null)}
+        onSaved={() => {
+          setEditing(null);
           load();
         }}
       />
@@ -323,6 +397,24 @@ export function ActivitiesPage({ role, user, companyId = "" }) {
                         </a>
                       </p>
                     )}
+                    {role !== "viewer" &&
+                      (role === "owner" ||
+                        activity.creator.id === user.membershipId) && (
+                        <div className="form-actions">
+                          <Button
+                            variant="quiet"
+                            onClick={() => setEditing(activity)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="danger"
+                            onClick={() => setDeleting(activity)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      )}
                   </article>
                 </li>
               ))}
@@ -350,6 +442,23 @@ export function ActivitiesPage({ role, user, companyId = "" }) {
           </>
         )}
       </section>
+      <Dialog
+        open={Boolean(deleting)}
+        title="Delete activity?"
+        description="This timeline entry will be permanently deleted. Any linked follow-up task remains available."
+        confirmLabel="Delete activity"
+        destructive
+        onClose={() => setDeleting(null)}
+        onConfirm={async () => {
+          const activity = deleting;
+          setDeleting(null);
+          await api(`/${activity.id}`, {
+            method: "DELETE",
+            body: JSON.stringify({ version: activity.version }),
+          });
+          load();
+        }}
+      />
     </>
   );
 }

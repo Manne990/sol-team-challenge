@@ -315,6 +315,9 @@ export function ContactsPage({ role }) {
       .filter(([, value]) => value !== "" && value !== 1)
       .map(([key, value]) => [key, String(value)]),
   ).toString();
+  useEffect(() => {
+    sessionStorage.setItem("northstar:contact-filters", query);
+  }, [query]);
   const load = async () => {
     setState((current) => ({ ...current, status: "loading" }));
     try {

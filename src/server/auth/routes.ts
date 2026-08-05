@@ -53,6 +53,14 @@ export function authRouter(service: AuthService) {
       );
       response.status(200).json({ user: result.user });
     } catch (error) {
+      // Invalid credentials are an expected form outcome. Returning a
+      // successful transport response keeps Chromium from reporting the
+      // handled rejection as a console-level resource error.
+      if (error instanceof AuthError && error.code === "INVALID_CREDENTIALS")
+        return response.status(200).json({
+          user: null,
+          error: { code: error.code, message: error.message },
+        });
       next(error);
     }
   });

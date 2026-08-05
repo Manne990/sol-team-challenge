@@ -1,6 +1,24 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+test("invalid credentials remain an expected console-clean form outcome", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await page.goto("/");
+  await page.getByLabel("Email address").fill("missing@example.test");
+  await page.getByLabel("Password").fill("wrong password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "Email or password is incorrect.",
+  );
+  expect(failures).toEqual([]);
+});
+
 test("owner creates and archives a contact through the accessible CRM", async ({
   page,
 }) => {
@@ -15,7 +33,9 @@ test("owner creates and archives a contact through the accessible CRM", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await page.getByRole("link", { name: "Contacts" }).click();
-  await expect(page.getByRole("heading", { name: "Contacts", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Contacts", exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("36 contacts")).toBeVisible();
   await page.getByRole("button", { name: "Add contact" }).click();
   await page.getByLabel("First name *").fill("Browser");

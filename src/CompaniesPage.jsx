@@ -238,6 +238,10 @@ export function CompaniesPage({ role, user, companyId }) {
       );
   };
   useEffect(load, [companyId, filters.toString()]);
+  useEffect(() => {
+    if (!companyId)
+      sessionStorage.setItem("northstar:company-filters", filters.toString());
+  }, [companyId, filters.toString()]);
   const canEdit = role !== "viewer";
   if (state.status === "loading") return <OperationalState type="loading" />;
   if (state.status !== "ready")

@@ -368,6 +368,51 @@ export class ActivityStore {
     }
   }
 
+  delete(actor: AuthenticatedUser, id: string, body: unknown) {
+    const current = this.detail(actor.organization.id, id);
+    if (!current) throw new AuthError(404, "NOT_FOUND", "Activity not found.");
+    if (actor.role !== "owner" && current.creator.id !== actor.membershipId)
+      throw new AuthError(
+        403,
+        "FORBIDDEN",
+        "Only the creator or an owner can delete this activity.",
+      );
+    const version = Number((body as Row | null)?.version);
+    if (!Number.isInteger(version))
+      throw invalid("Refresh the activity before deleting it.");
+    const now = new Date().toISOString();
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db
+        .prepare(
+          "DELETE FROM activity_participants WHERE organization_id=? AND activity_id=?",
+        )
+        .run(actor.organization.id, id);
+      const result = this.db
+        .prepare(
+          "DELETE FROM activities WHERE organization_id=? AND id=? AND version=?",
+        )
+        .run(actor.organization.id, id, version) as Row;
+      if (Number(result.changes) === 0)
+        throw new AuthError(
+          409,
+          "EDIT_CONFLICT",
+          "This activity changed. Refresh and review the latest version.",
+        );
+      this.audit(
+        actor,
+        "activity.deleted",
+        id,
+        { subject: current.subject },
+        now,
+      );
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   private audit(
     actor: AuthenticatedUser,
     action: string,
@@ -449,6 +494,18 @@ export function activitiesRouter(db: SqliteDatabase, auth: AuthService) {
           request.body,
         ),
       });
+    } catch (error) {
+      next(error);
+    }
+  });
+  router.delete("/:id", async (request, response, next) => {
+    try {
+      store.delete(
+        await actor(request, true),
+        String(request.params.id),
+        request.body,
+      );
+      response.status(204).end();
     } catch (error) {
       next(error);
     }
