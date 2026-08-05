@@ -17,6 +17,7 @@ import { DealsPage } from "./DealsPage.jsx";
 import { NotificationsPanel } from "./NotificationsPanel.jsx";
 import { GlobalSearch } from "./Discovery.jsx";
 import { AdministrationPage, AuditPage } from "./GovernancePage.jsx";
+import { DashboardPage } from "./DashboardPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -192,6 +193,8 @@ export function App({ role = "owner", user, onSignOut }) {
           <AuditPage />
         ) : section === "administration" ? (
           <AdministrationPage user={user} />
+        ) : section === "dashboard" ? (
+          <DashboardPage />
         ) : (
           <>
             <div className="page-heading">
