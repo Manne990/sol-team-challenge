@@ -85,6 +85,10 @@ export function authRouter(service: AuthService) {
 
   router.get("/session", (request: AuthenticatedRequest, response, next) => {
     try {
+      // Session discovery is expected during application bootstrap. An absent
+      // session is not an exceptional request and must not create a browser
+      // console error.
+      if (!request.authUser) return response.status(204).end();
       response.json({
         user: service.requireRole(request.authUser, [
           "owner",

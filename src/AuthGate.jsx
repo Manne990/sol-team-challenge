@@ -32,7 +32,7 @@ export function AuthGate({ children }) {
   useEffect(() => {
     const controller = new AbortController();
     fetch('/api/auth/session', { credentials: 'same-origin', signal: controller.signal })
-      .then(async (response) => response.ok ? { status: 'ready', user: (await response.json()).user } : { status: 'anonymous' })
+      .then(async (response) => response.status === 204 ? { status: 'anonymous' } : response.ok ? { status: 'ready', user: (await response.json()).user } : { status: 'anonymous' })
       .then(setState).catch((error) => { if (error.name !== 'AbortError') setState({ status: 'unavailable' }); });
     return () => controller.abort();
   }, []);

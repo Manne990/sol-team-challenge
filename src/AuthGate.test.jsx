@@ -7,7 +7,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('authentication flow', () => {
   it('shows a keyboard-usable sign-in after an anonymous session check', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204 }));
     render(<AuthGate>{() => <p>Workspace</p>}</AuthGate>);
     expect(screen.getByRole('status')).toHaveTextContent('Loading');
     expect(await screen.findByRole('heading', { name: 'Sign in to Northstar' })).toBeVisible();

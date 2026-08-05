@@ -39,7 +39,7 @@ async function api(path, options) {
   return body;
 }
 
-function ContactForm({ initial, onClose, onSaved }) {
+export function ContactForm({ initial, onClose, onSaved }) {
   const [form, setForm] = useState(
     initial
       ? {
@@ -53,12 +53,41 @@ function ContactForm({ initial, onClose, onSaved }) {
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [version, setVersion] = useState(initial?.version);
+  const [conflict, setConflict] = useState(null);
   const dialog = useRef(null);
   useEffect(() => {
     const previous = document.activeElement;
     dialog.current?.focus();
-    return () => previous?.focus?.();
-  }, []);
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const controls = [
+        ...dialog.current.querySelectorAll(
+          'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',
+        ),
+      ].filter((control) => !control.disabled);
+      if (!controls.length) return;
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previous?.focus?.();
+    };
+  }, [onClose]);
   const update = (event) =>
     setForm((value) => ({ ...value, [event.target.name]: event.target.value }));
   async function submit(event) {
@@ -75,7 +104,7 @@ function ContactForm({ initial, onClose, onSaved }) {
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
-        version: initial?.version,
+        version,
       };
       const result = await api(
         initial ? `/api/contacts/${initial.id}` : "/api/contacts",
@@ -84,11 +113,10 @@ function ContactForm({ initial, onClose, onSaved }) {
       onSaved(result);
     } catch (failure) {
       setError(failure.message);
-      if (failure.status === 409 && failure.body?.contact)
-        setForm((value) => ({
-          ...value,
-          version: failure.body.contact.version,
-        }));
+      if (failure.status === 409 && failure.body?.contact) {
+        setConflict(failure.body.contact);
+        setVersion(failure.body.contact.version);
+      }
     } finally {
       setBusy(false);
     }
@@ -114,6 +142,37 @@ function ContactForm({ initial, onClose, onSaved }) {
           <div className="auth-error" role="alert">
             {error}
           </div>
+        )}
+        {conflict && (
+          <section
+            className="conflict-review"
+            aria-labelledby="contact-conflict-title"
+          >
+            <h3 id="contact-conflict-title">Review the latest saved version</h3>
+            <p>
+              Another person saved {conflict.name}. Your draft is still in the
+              form below. Compare it with the latest values, then save again to
+              apply your draft.
+            </p>
+            <dl>
+              <div>
+                <dt>Name</dt>
+                <dd>{conflict.name}</dd>
+              </div>
+              <div>
+                <dt>Email</dt>
+                <dd>{conflict.email || "—"}</dd>
+              </div>
+              <div>
+                <dt>Phone</dt>
+                <dd>{conflict.phone || "—"}</dd>
+              </div>
+              <div>
+                <dt>Job title</dt>
+                <dd>{conflict.jobTitle || "—"}</dd>
+              </div>
+            </dl>
+          </section>
         )}
         <form onSubmit={submit} className="contact-form">
           <label>
