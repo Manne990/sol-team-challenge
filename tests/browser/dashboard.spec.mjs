@@ -31,3 +31,25 @@ test("dashboard metrics reconcile with their filtered work lists", async ({
   ).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
+
+test("expired sessions return to a console-clean sign-in state", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await page.goto("/");
+  await page.getByLabel("Email address").fill("member@northstar.test");
+  await page.getByLabel("Password").fill("MemberPass!2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  await page.context().clearCookies();
+  await page.getByRole("button", { name: "Refresh metrics" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Sign in to Northstar" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  expect(failures).toEqual([]);
+});

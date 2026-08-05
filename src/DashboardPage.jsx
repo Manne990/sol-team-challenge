@@ -24,12 +24,22 @@ export function DashboardPage() {
     try {
       const response = await fetch("/api/dashboard", {
           credentials: "same-origin",
+          headers: { "x-northstar-ui-request": "true" },
         }),
         body = await response.json();
-      if (!response.ok)
-        throw new Error(body?.error?.message || "Dashboard unavailable");
+      if (!response.ok || body?.error) {
+        const error = new Error(
+          body?.error?.message || "Dashboard unavailable",
+        );
+        error.status = body?.error?.status || response.status;
+        throw error;
+      }
       setState({ status: "ready", data: body });
     } catch (error) {
+      if (error?.status === 401) {
+        window.dispatchEvent(new Event("northstar:session-expired"));
+        return;
+      }
       setState({
         status: "error",
         message:
