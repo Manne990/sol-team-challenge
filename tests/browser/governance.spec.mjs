@@ -65,3 +65,22 @@ test("non-owner cannot discover governance APIs", async ({ page }) => {
   );
   expect(statuses).toEqual([403, 403, 403]);
 });
+
+test("member administration restriction is a console-clean UI outcome", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await signIn(page, "member@northstar.test", "MemberPass!2026");
+  await page.goto("/#administration");
+  await expect(
+    page.getByRole("heading", { name: "We couldn’t load this view" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("You do not have permission to do that"),
+  ).toBeVisible();
+  expect(failures).toEqual([]);
+});
