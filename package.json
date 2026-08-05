@@ -2,6 +2,7 @@
   "name": "northstar-crm-challenge",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "Source-identical baseline for the SOL versus Gaia CRM challenge",
   "engines": {
     "node": ">=22"
@@ -9,8 +10,20 @@
   "scripts": {
     "db:reset": "node scripts/baseline.mjs db-reset",
     "db:seed": "node scripts/baseline.mjs db-seed",
-    "ci": "node scripts/baseline.mjs ci",
-    "build": "node scripts/baseline.mjs build",
-    "dev": "node scripts/baseline.mjs dev"
+    "ci": "vitest run",
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "jsdom": "latest",
+    "vitest": "latest"
   }
 }
