@@ -82,6 +82,8 @@ export function AuthGate({ children }) {
   const [state, setState] = useState({ status: "loading" });
   useEffect(() => {
     const controller = new AbortController();
+    const sessionExpired = () => setState({ status: "anonymous" });
+    window.addEventListener("northstar:session-expired", sessionExpired);
     fetch("/api/auth/session", {
       credentials: "same-origin",
       signal: controller.signal,
@@ -97,7 +99,10 @@ export function AuthGate({ children }) {
       .catch((error) => {
         if (error.name !== "AbortError") setState({ status: "unavailable" });
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      window.removeEventListener("northstar:session-expired", sessionExpired);
+    };
   }, []);
   if (state.status === "loading")
     return (
