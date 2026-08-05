@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { globSync } from "node:fs";
 
-const files = globSync("tests/**/*.{test,spec}.{js,mjs,cjs,ts,tsx}").sort();
+const files = globSync("{test,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,tsx}").sort();
 if (files.length === 0) throw new Error("CI requires at least one test file");
 
 const forbidden = [
