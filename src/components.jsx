@@ -81,6 +81,7 @@ export function Dialog({
   destructive,
   onConfirm,
   onClose,
+  children,
 }) {
   const dialogRef = useRef(null);
   const titleId = useId();
@@ -133,6 +134,7 @@ export function Dialog({
       >
         <h2 id={titleId}>{title}</h2>
         <p id={descriptionId}>{description}</p>
+        {children}
         <div className="dialog__actions">
           <Button variant="quiet" onClick={onClose}>
             Cancel
