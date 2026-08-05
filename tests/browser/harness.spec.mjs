@@ -19,6 +19,49 @@ test("invalid credentials remain an expected console-clean form outcome", async 
   expect(failures).toEqual([]);
 });
 
+test("stale contact edits preserve the draft without console errors", async ({
+  page,
+}) => {
+  const failures = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.push(message.text());
+  });
+  page.on("pageerror", (error) => failures.push(error.message));
+  await page.goto("/");
+  await page.getByLabel("Email address").fill("member@northstar.test");
+  await page.getByLabel("Password").fill("MemberPass!2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("link", { name: "Contacts" }).click();
+  await page
+    .getByRole("button", { name: "Contact1 Person1", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Edit" }).click();
+  await page.getByLabel("Job title").fill("My preserved draft");
+  const externalStatus = await page.evaluate(async () => {
+    const current = (
+      await (await fetch("/api/contacts/con_0001_northstar")).json()
+    ).contact;
+    const response = await fetch("/api/contacts/con_0001_northstar", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...current,
+        companyId: current.company?.id || null,
+        ownerMembershipId: current.owner?.id || null,
+        jobTitle: "Externally saved title",
+      }),
+    });
+    return response.status;
+  });
+  expect(externalStatus).toBe(200);
+  await page.getByRole("button", { name: "Save contact" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Review the latest saved version" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Job title")).toHaveValue("My preserved draft");
+  expect(failures).toEqual([]);
+});
+
 test("owner creates and archives a contact through the accessible CRM", async ({
   page,
 }) => {
