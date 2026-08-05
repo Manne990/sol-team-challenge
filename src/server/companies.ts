@@ -166,6 +166,11 @@ export class CompanyStore {
         "SELECT action,summary_json,created_at FROM audit_events WHERE organization_id=? AND entity_type='company' AND entity_id=? ORDER BY created_at DESC,id DESC LIMIT 50",
       )
       .all(org, id) as Row[];
+    const activities = this.db
+      .prepare(
+        "SELECT id,type,subject,body,occurred_at occurredAt,creator_label creatorLabel,follow_up_task_id followUpTaskId FROM activities WHERE organization_id=? AND company_id=? ORDER BY occurred_at DESC,id DESC LIMIT 50",
+      )
+      .all(org, id) as Row[];
     return {
       ...company(row),
       related: {
@@ -179,6 +184,7 @@ export class CompanyStore {
         summary: JSON.parse(String(x.summary_json)),
         createdAt: x.created_at,
       })),
+      activities,
     };
   }
   write(

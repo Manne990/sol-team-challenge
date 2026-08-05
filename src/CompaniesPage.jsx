@@ -333,6 +333,31 @@ export function CompaniesPage({ role, user, companyId }) {
         </section>
         <section className="panel">
           <div className="panel__heading">
+            <h2>Activity history</h2>
+            <a href={`#activities?companyId=${c.id}`}>View timeline →</a>
+          </div>
+          {c.activities.length ? (
+            <ul className="history">
+              {c.activities.map((activity) => (
+                <li key={activity.id}>
+                  <span>
+                    <strong>{activity.subject}</strong>
+                    <small>
+                      {" "}
+                      {activity.type.replace("_", " ")} ·{" "}
+                      {activity.creatorLabel}
+                    </small>
+                  </span>
+                  <time>{new Date(activity.occurredAt).toLocaleString()}</time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <OperationalState type="empty" title="No activity recorded" />
+          )}
+        </section>
+        <section className="panel">
+          <div className="panel__heading">
             <h2>Change history</h2>
           </div>
           {c.history.length ? (

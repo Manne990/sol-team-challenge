@@ -11,6 +11,7 @@ import { CompaniesPage } from "./CompaniesPage.jsx";
 import { ContactsPage } from "./ContactsPage.jsx";
 import { ImportsPage } from "./ImportsPage.jsx";
 import { TasksPage } from "./TasksPage.jsx";
+import { ActivitiesPage } from "./ActivitiesPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -86,7 +87,8 @@ export function App({ role = "owner", user, onSignOut }) {
   const section = route.split(/[/?]/)[0],
     companyId = route.startsWith("companies/")
       ? route.split(/[/?]/)[1]
-      : undefined;
+      : undefined,
+    routeQuery = new URLSearchParams(route.split("?")[1] || "");
   const visibleNavigation = navigation.filter(
     ([, , requiredRole]) => !requiredRole || role === requiredRole,
   );
@@ -177,6 +179,12 @@ export function App({ role = "owner", user, onSignOut }) {
           <TasksPage role={role} />
         ) : section === "imports" ? (
           <ImportsPage role={role} />
+        ) : section === "activities" ? (
+          <ActivitiesPage
+            role={role}
+            user={user}
+            companyId={routeQuery.get("companyId") || ""}
+          />
         ) : (
           <>
             <div className="page-heading">
