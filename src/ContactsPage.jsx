@@ -24,11 +24,14 @@ const emptyForm = {
 async function api(path, options) {
   const response = await fetch(path, {
     credentials: "same-origin",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-northstar-ui-request": "true",
+    },
     ...options,
   });
   const body = response.status === 204 ? {} : await response.json();
-  if (!response.ok) {
+  if (!response.ok || body?.error) {
     const error = new Error(
       body?.error?.message || "Northstar could not complete that request.",
     );
