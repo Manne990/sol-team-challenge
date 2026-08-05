@@ -8,6 +8,7 @@ import {
   ToastRegion,
 } from "./components.jsx";
 import { CompaniesPage } from "./CompaniesPage.jsx";
+import { ContactsPage } from "./ContactsPage.jsx";
 
 export const navigation = [
   ["Dashboard", "dashboard"],
@@ -163,6 +164,8 @@ export function App({ role = "owner", user, onSignOut }) {
       <main id="main-content" className="content">
         {section === "companies" ? (
           <CompaniesPage key={route} role={role} user={user} companyId={companyId} />
+        ) : section === "contacts" ? (
+          <ContactsPage role={role} />
         ) : (
           <>
             <div className="page-heading">
@@ -274,7 +277,9 @@ export function App({ role = "owner", user, onSignOut }) {
         onClose={() => setDialogOpen(false)}
         onConfirm={() => setDialogOpen(false)}
       />
-      <ToastRegion messages={toast} onDismiss={() => setToast([])} />
+      {section !== "contacts" && (
+        <ToastRegion messages={toast} onDismiss={() => setToast([])} />
+      )}
     </div>
   );
 }
