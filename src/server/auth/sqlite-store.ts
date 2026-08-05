@@ -68,6 +68,15 @@ export class SqliteAuthStore implements AuthStore {
         input.expiresAt,
         now,
       );
+    this.audit(
+      input.organizationId,
+      input.userId,
+      "authentication.signed_in",
+      String(membership.id),
+      {},
+      now,
+      "authentication",
+    );
   }
 
   async findSession(
@@ -102,11 +111,26 @@ export class SqliteAuthStore implements AuthStore {
   }
 
   async revokeSession(tokenHash: string, now: string) {
+    const session = this.db
+      .prepare(
+        "SELECT s.organization_id,m.user_id,m.id membership_id FROM sessions s JOIN memberships m ON m.id=s.membership_id AND m.organization_id=s.organization_id WHERE s.token_hash=? AND s.revoked_at IS NULL",
+      )
+      .get(tokenHash) as Row | undefined;
     this.db
       .prepare(
         "UPDATE sessions SET revoked_at=COALESCE(revoked_at,?) WHERE token_hash=?",
       )
       .run(now, tokenHash);
+    if (session)
+      this.audit(
+        String(session.organization_id),
+        String(session.user_id),
+        "authentication.signed_out",
+        String(session.membership_id),
+        {},
+        now,
+        "authentication",
+      );
   }
 
   async listMembers(organizationId: string) {
@@ -308,6 +332,7 @@ export class SqliteAuthStore implements AuthStore {
     entityId: string,
     summary: object,
     now: string,
+    entityType = "membership",
   ) {
     const actor = this.db
       .prepare(
@@ -324,7 +349,7 @@ export class SqliteAuthStore implements AuthStore {
         organizationId,
         actor?.id ?? null,
         action,
-        "membership",
+        entityType,
         entityId,
         randomUUID(),
         JSON.stringify(summary),

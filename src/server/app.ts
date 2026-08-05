@@ -17,6 +17,7 @@ import { activitiesRouter } from "./activities.js";
 import { dealsRouter } from "./deals.js";
 import { notificationsRouter } from "./notifications.js";
 import { discoveryRouter } from "./discovery.js";
+import { governanceRouter } from "./governance.js";
 
 export function createApp(database: SqliteDatabase) {
   const app = express();
@@ -33,6 +34,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/deals", dealsRouter(database, auth));
   app.use("/api/notifications", notificationsRouter(database, auth));
   app.use("/api", discoveryRouter(database, auth));
+  app.use("/api/governance", governanceRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {
