@@ -13,6 +13,7 @@ import {
   WorkspacePreview,
 } from "./client/components";
 import { ContactsPage } from "./client/ContactsPage";
+import { ImportsPage } from "./client/ImportsPage";
 import { CompaniesWorkspace } from "./client/components/CompaniesWorkspace";
 import { TasksPage } from "./TasksPage.jsx";
 import "./styles.css";
@@ -49,7 +50,8 @@ function Workspace({
     path.startsWith("/contacts") ||
     path.startsWith("/companies") ||
     path.startsWith("/tasks") ||
-    path.startsWith("/activities")
+    path.startsWith("/activities") ||
+    path.startsWith("/imports")
   )
     return (
       <AppShell
@@ -60,7 +62,9 @@ function Workspace({
               ? "/activities"
               : path.startsWith("/tasks")
                 ? "/tasks"
-                : "/companies"
+                : path.startsWith("/imports")
+                  ? "/imports"
+                  : "/companies"
         }
         navigate={navigate}
         role={user.role}
@@ -69,7 +73,9 @@ function Workspace({
         userEmail={user.email}
         onSignOut={onSignOut}
       >
-        {path.startsWith("/contacts") ? (
+        {path.startsWith("/imports") ? (
+          <ImportsPage role={user.role} />
+        ) : path.startsWith("/contacts") ? (
           <ContactsPage role={user.role} />
         ) : path.startsWith("/activities") ? (
           <ActivitiesPage role={user.role} user={user} />
