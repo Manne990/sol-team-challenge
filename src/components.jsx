@@ -46,10 +46,10 @@ export function DataTable({ caption, columns, rows }) {
 
 export function OperationalState({ type, title, message, action }) {
   const copy = {
-    loading: ["Loading", "Fetching tasks…"],
-    empty: ["No tasks found", "Adjust the filters or add a task."],
-    forbidden: ["Access restricted", "Your role cannot access these tasks."],
-    error: ["Tasks could not be loaded", "Try again."],
+    loading: ["Loading", "Fetching the latest information…"],
+    empty: ["Nothing here yet", "Adjust filters or add the first record."],
+    forbidden: ["Access restricted", "Your role cannot access this view."],
+    error: ["We couldn’t load this view", "Try again."],
     "not-found": [
       "Record not found",
       "It may have been archived or the link may be incorrect.",

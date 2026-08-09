@@ -57,6 +57,19 @@ export function authRouter(service: AuthService) {
     }
   });
 
+  router.get("/session", async (request, response, next) => {
+    const secret = readCookie(request.headers.cookie, SESSION_COOKIE);
+    if (!secret) return response.status(204).end();
+    try {
+      const user = await service.authenticate(secret);
+      response.json({
+        user: service.requireRole(user, ["owner", "member", "viewer"]),
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.use(async (request: AuthenticatedRequest, _response, next) => {
     try {
       request.authUser = await service.authenticate(
@@ -82,20 +95,6 @@ export function authRouter(service: AuthService) {
       }
     },
   );
-
-  router.get("/session", (request: AuthenticatedRequest, response, next) => {
-    try {
-      response.json({
-        user: service.requireRole(request.authUser, [
-          "owner",
-          "member",
-          "viewer",
-        ]),
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
 
   router.get(
     "/members",
