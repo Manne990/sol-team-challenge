@@ -1,6 +1,26 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/auth/session", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        user: {
+          id: "user-owner",
+          membershipId: "membership-owner",
+          email: "owner@northstar.test",
+          name: "Northstar Owner",
+          role: "owner",
+          organization: { id: "org-northstar", name: "Northstar Demo" },
+          sessionExpiresAt: "2026-08-10T08:00:00.000Z",
+        },
+      }),
+    });
+  });
+});
+
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
   { name: "tablet", width: 1024, height: 768 },
