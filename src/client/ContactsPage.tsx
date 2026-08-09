@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { Role } from "../shared/auth";
+import { SavedViews } from "../Discovery.jsx";
 import {
   Button,
   ConfirmDialog,
@@ -210,6 +211,18 @@ export function ContactsPage({ role }: { role: Role }) {
           canEdit ? (
             <Button onClick={() => openForm()}>Add contact</Button>
           ) : undefined
+        }
+      />
+      <SavedViews
+        resource="contacts"
+        definition={filters}
+        onApply={(value) =>
+          setFilters({
+            q: typeof value.q === "string" ? value.q : "",
+            status: typeof value.status === "string" ? value.status : "",
+            tag: typeof value.tag === "string" ? value.tag : "",
+            page: Number.isInteger(value.page) ? Number(value.page) : 1,
+          })
         }
       />
       <FilterBar

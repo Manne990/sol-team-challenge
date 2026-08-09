@@ -5,6 +5,7 @@ import {
   OperationalState,
   ToastRegion,
 } from "./components.jsx";
+import { SavedViews } from "./Discovery.jsx";
 
 async function api(path, options) {
   const response = await fetch(path, {
@@ -359,6 +360,20 @@ export function TasksPage({ role }) {
           <Button onClick={() => setForm("create")}>+ Add task</Button>
         )}
       </div>
+      <SavedViews
+        resource="tasks"
+        definition={filters}
+        onApply={(value) =>
+          setFilters({
+            view: "open",
+            assignedToMe: "",
+            q: "",
+            priority: "",
+            page: 1,
+            ...value,
+          })
+        }
+      />
       <nav className="task-views" aria-label="Task views">
         {[
           ["open", "Open"],
