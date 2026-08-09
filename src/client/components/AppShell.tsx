@@ -61,6 +61,7 @@ export const defaultNavigation: NavigationItem[] = [
   { href: "/tasks", label: "Tasks", icon: icons.tasks },
   { href: "/notifications", label: "Notifications", icon: icons.notifications },
   { href: "/imports", label: "Imports", icon: icons.imports },
+  { href: "/duplicates", label: "Duplicates", icon: icons.imports },
   { href: "/audit", label: "Audit", icon: icons.audit, ownerOnly: true },
   {
     href: "/admin",

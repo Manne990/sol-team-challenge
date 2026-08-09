@@ -333,7 +333,13 @@ export function contactsRouter(database: SqliteDatabase, auth: AuthService) {
   router.get("/:contactId", async (request, response, next) => {
     try {
       const user = await authenticate(request);
-      const id = String(request.params.contactId);
+      const requestedId = String(request.params.contactId);
+      const redirect = database
+        .prepare(
+          "SELECT survivor_id FROM merge_redirects WHERE organization_id=? AND entity_type='contact' AND retired_id=?",
+        )
+        .get(user.organization.id, requestedId) as Row | undefined;
+      const id = redirect ? String(redirect.survivor_id) : requestedId;
       const row = existing(user.organization.id, id);
       if (!row)
         return response.status(404).json({
@@ -359,6 +365,7 @@ export function contactsRouter(database: SqliteDatabase, auth: AuthService) {
       }));
       response.json({
         contact: contactJson(row),
+        redirectedFrom: redirect ? requestedId : null,
         activities,
         deals,
         tasks,

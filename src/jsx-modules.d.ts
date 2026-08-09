@@ -9,4 +9,7 @@ declare module "*.jsx" {
     definition: Record<string, unknown>;
     onApply: (definition: Record<string, unknown>) => void;
   }>;
+  export const DuplicatesPage: ComponentType<{
+    role: "owner" | "member" | "viewer";
+  }>;
 }

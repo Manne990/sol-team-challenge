@@ -19,6 +19,7 @@ import { CompaniesWorkspace } from "./client/components/CompaniesWorkspace";
 import { TasksPage } from "./TasksPage.jsx";
 // @ts-expect-error This shared JSX surface is validated by ESLint and browser tests.
 import { DealsPage } from "./DealsPage.jsx";
+import { DuplicatesPage } from "./DuplicatesPage.jsx";
 import "./styles.css";
 import "./client/styles.css";
 
@@ -56,7 +57,8 @@ function Workspace({
     path.startsWith("/activities") ||
     path.startsWith("/imports") ||
     path.startsWith("/notifications") ||
-    path.startsWith("/deals")
+    path.startsWith("/deals") ||
+    path.startsWith("/duplicates")
   )
     return (
       <AppShell
@@ -69,11 +71,13 @@ function Workspace({
                 ? "/tasks"
                 : path.startsWith("/imports")
                   ? "/imports"
-                  : path.startsWith("/deals")
-                    ? "/deals"
-                    : path.startsWith("/notifications")
-                      ? "/notifications"
-                      : "/companies"
+                  : path.startsWith("/duplicates")
+                    ? "/duplicates"
+                    : path.startsWith("/deals")
+                      ? "/deals"
+                      : path.startsWith("/notifications")
+                        ? "/notifications"
+                        : "/companies"
         }
         navigate={navigate}
         role={user.role}
@@ -86,6 +90,8 @@ function Workspace({
           <ImportsPage role={user.role} />
         ) : path.startsWith("/notifications") ? (
           <NotificationsPage />
+        ) : path.startsWith("/duplicates") ? (
+          <DuplicatesPage role={user.role} />
         ) : path.startsWith("/contacts") ? (
           <ContactsPage role={user.role} />
         ) : path.startsWith("/activities") ? (
