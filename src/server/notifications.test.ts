@@ -127,7 +127,7 @@ describe("notification generation", () => {
     expect(store.list(owner, {}).total).toBe(before);
     expect(
       store
-        .list(owner, {})
+        .list(owner, { pageSize: 100 })
         .items.some((item) => item.entityId === "task_0001_northstar"),
     ).toBe(true);
   });

@@ -154,7 +154,7 @@ export class NotificationStore {
     );
     const rows = this.db
       .prepare(
-        `SELECT * FROM notifications WHERE ${where} ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?`,
+        `SELECT * FROM notifications WHERE ${where} ORDER BY created_at DESC,deduplication_key ASC LIMIT ? OFFSET ?`,
       )
       .all(...args, pageSize, (page - 1) * pageSize) as Row[];
     return {
