@@ -8,15 +8,15 @@ import type { SqliteDatabase } from "./auth/sqlite-store.js";
 import { authErrorHandler, authRouter } from "./auth/routes.js";
 import { AuthService } from "./auth/service.js";
 import { SqliteAuthStore } from "./auth/sqlite-store.js";
+import { contactsRouter } from "./contacts/routes.js";
 
 export function createApp(database: SqliteDatabase) {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
-  app.use(
-    "/api/auth",
-    authRouter(new AuthService(new SqliteAuthStore(database))),
-  );
+  const auth = new AuthService(new SqliteAuthStore(database));
+  app.use("/api/auth", authRouter(auth));
+  app.use("/api/contacts", contactsRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {
