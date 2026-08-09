@@ -6,8 +6,15 @@ import { createTestRuntime } from "../support/test-runtime.mjs";
 
 async function startEphemeralServer(databasePath) {
   const child = spawn(
-    "npm",
-    ["run", "dev", "--", "--host", "127.0.0.1", "--port", "0"],
+    process.execPath,
+    [
+      "node_modules/tsx/dist/cli.mjs",
+      "src/server/index.ts",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "0",
+    ],
     {
       stdio: ["ignore", "pipe", "pipe"],
       env: {
