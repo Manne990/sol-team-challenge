@@ -5,6 +5,7 @@ import type {
   CompanyInput,
 } from "../../shared/companies";
 import type { UserRole } from "./AppShell";
+import { SavedViews } from "../../Discovery.jsx";
 import {
   Button,
   ConfirmDialog,
@@ -87,8 +88,17 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
     }
   }, [page, query, lifecycle]);
   useEffect(() => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (lifecycle) params.set("lifecycle", lifecycle);
+    if (page > 1) params.set("page", String(page));
+    history.replaceState(
+      null,
+      "",
+      `/companies${params.size ? `?${params}` : ""}`,
+    );
     void load();
-  }, [load]);
+  }, [load, lifecycle, page, query]);
   async function open(company: Company) {
     try {
       const result = await request<{ company: CompanyDetail }>(
@@ -318,6 +328,17 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
         </section>
       ) : (
         <>
+          <SavedViews
+            resource="companies"
+            definition={{ q: query, lifecycle, page }}
+            onApply={(value) => {
+              setQuery(typeof value.q === "string" ? value.q : "");
+              setLifecycle(
+                typeof value.lifecycle === "string" ? value.lifecycle : "",
+              );
+              setPage(Number.isInteger(value.page) ? Number(value.page) : 1);
+            }}
+          />
           <FilterBar
             activeCount={Number(Boolean(query)) + Number(Boolean(lifecycle))}
             onClear={() => {

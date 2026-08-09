@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { GlobalSearch } from "../../Discovery.jsx";
 
 export type UserRole = "owner" | "member" | "viewer";
 
@@ -229,6 +230,7 @@ export function AppShell({
         </div>
       </aside>
       <main className="ns-main" id="main-content" tabIndex={-1}>
+        <GlobalSearch />
         {children}
       </main>
     </div>

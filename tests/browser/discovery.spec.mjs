@@ -42,7 +42,7 @@ test("user saves and reapplies a personal company filter view", async ({
   await page.getByRole("button", { name: "Save new" }).click();
   await expect(page.getByLabel("Personal view")).toHaveValue(/.+/);
 
-  await page.getByRole("button", { name: "Clear filters" }).click();
+  await page.getByRole("button", { name: /Clear all/ }).click();
   await expect(page.getByLabel("Lifecycle")).toHaveValue("");
   await page.getByLabel("Personal view").selectOption({ label: "Prospects" });
   await expect(page.getByLabel("Lifecycle")).toHaveValue("prospect");

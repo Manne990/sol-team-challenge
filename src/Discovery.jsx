@@ -46,8 +46,8 @@ export function GlobalSearch() {
   }, [query]);
   const href = (resource, item) =>
     resource === "companies" || resource === "deals"
-      ? `#${resource}/${item.id}`
-      : `#${resource}?q=${encodeURIComponent(item.name)}`;
+      ? `/${resource}/${item.id}`
+      : `/${resource}?q=${encodeURIComponent(item.name)}`;
   const count = Object.values(state.groups).reduce(
     (sum, items) => sum + items.length,
     0,
