@@ -13,9 +13,11 @@ starts the complete product without coordinating ports.
 - `src/shared` contains transport-safe types shared by browser and server.
 - `scripts` contains database and operational lifecycle commands.
 
-Feature code should depend inward: routes call services/repositories; database
-details do not enter React components. API errors use stable codes, corrective
-messages, and request IDs. Unexpected details are logged server-side only.
+Feature code depends inward: routes call services/repositories; database details
+do not enter React components. Authentication and role checks run at every API
+boundary, and every repository query derives organization scope from the
+authenticated session. API errors use stable codes, corrective messages, and
+request IDs. Unexpected details are logged server-side only.
 
 ## Task time policy
 
@@ -38,10 +40,19 @@ CLI host and port take precedence over environment values. Invalid values stop
 startup with a corrective error. Database files, environment files, build
 outputs, logs, and test artifacts are ignored by Git.
 
+## Product surfaces
+
+The React router exposes Dashboard, Companies, Contacts, Activities, Deals,
+Tasks, Notifications, Imports, Duplicates, Audit, and Administration. Express
+mounts the corresponding organization-scoped APIs beneath `/api`, while
+authentication session and membership operations live beneath `/api/auth`.
+Audit and Administration navigation and APIs are owner-only. All other CRM
+surfaces are readable by viewers; mutation routes require an owner or member as
+defined by the domain service.
+
 ## Extension points
 
-The database lifecycle scripts are intentionally stable root entry points for
-forward migrations and deterministic seed logic. Authentication middleware can
-be added before domain routes. Each domain should expose an organization-scoped
-repository and service rather than accepting organization identifiers from the
-browser as authority.
+The database lifecycle scripts are stable root entry points for forward
+migrations and deterministic seed logic. New domains should expose an
+organization-scoped repository and service rather than accepting organization
+identifiers from the browser as authority.

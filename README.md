@@ -39,5 +39,19 @@ and `NORTHSTAR_PORT` provide environment-based defaults, while explicit CLI
 arguments win. Invalid configuration fails before the server listens.
 
 `npm run build` creates the production client and server in `dist`; run it with
-`npm start`. See [`docs/architecture.md`](docs/architecture.md) for boundaries,
-configuration, and feature extension points.
+`npm start`. See [`docs/architecture.md`](docs/architecture.md) for boundaries
+and configuration, [`docs/database.md`](docs/database.md) for database recovery,
+and [`docs/release.md`](docs/release.md) for the complete surface inventory,
+known limitations, and clean release-verification procedure.
+
+## Seed accounts
+
+| Organization   | Email                      | Password           | Role   |
+| -------------- | -------------------------- | ------------------ | ------ |
+| Northstar Demo | `owner@northstar.test`     | `OwnerPass!2026`   | owner  |
+| Northstar Demo | `member@northstar.test`    | `MemberPass!2026`  | member |
+| Northstar Demo | `viewer@northstar.test`    | `ViewerPass!2026`  | viewer |
+| Outside Demo   | `other-owner@outside.test` | `OutsidePass!2026` | owner  |
+
+These deterministic credentials are for local and acceptance environments only.
+Do not deploy the seeded database as a public production instance.
