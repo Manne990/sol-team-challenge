@@ -61,7 +61,9 @@ test("viewer sees list and pipeline but no deal mutation controls or foreign det
   await expect(page.getByRole("heading", { name: "Deals" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add deal" })).toHaveCount(0);
   await page.getByRole("button", { name: "List" }).click();
-  await expect(page.getByRole("region", { name: "Deals table" })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Deals, scrollable" }),
+  ).toBeVisible();
   await page.goto("/deals/deal_outside");
   await expect(
     page.getByRole("heading", { name: "Record not found" }),
