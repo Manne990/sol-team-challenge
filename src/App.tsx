@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { AuthGate } from "./AuthGate";
+import { ActivitiesPage } from "./ActivitiesPage";
 import {
   AppShell,
   OperationalState,
@@ -47,16 +48,19 @@ function Workspace({
   if (
     path.startsWith("/contacts") ||
     path.startsWith("/companies") ||
-    path.startsWith("/tasks")
+    path.startsWith("/tasks") ||
+    path.startsWith("/activities")
   )
     return (
       <AppShell
         currentPath={
           path.startsWith("/contacts")
             ? "/contacts"
-            : path.startsWith("/tasks")
-              ? "/tasks"
-              : "/companies"
+            : path.startsWith("/activities")
+              ? "/activities"
+              : path.startsWith("/tasks")
+                ? "/tasks"
+                : "/companies"
         }
         navigate={navigate}
         role={user.role}
@@ -67,6 +71,8 @@ function Workspace({
       >
         {path.startsWith("/contacts") ? (
           <ContactsPage role={user.role} />
+        ) : path.startsWith("/activities") ? (
+          <ActivitiesPage role={user.role} user={user} />
         ) : path.startsWith("/tasks") ? (
           <TasksPage role={user.role} />
         ) : (

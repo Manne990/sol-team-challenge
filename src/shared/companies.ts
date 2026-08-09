@@ -38,6 +38,15 @@ export interface CompanyDetail extends Company {
     timestamp: string;
     summary: Record<string, unknown>;
   }>;
+  activities?: Array<{
+    id: string;
+    type: string;
+    subject: string;
+    body: string;
+    occurredAt: string;
+    creatorLabel: string;
+    followUpTaskId: string | null;
+  }>;
 }
 
 export interface CompanyInput {

@@ -267,6 +267,31 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
             <li>{selected.relatedCounts.deals} deals</li>
             <li>{selected.relatedCounts.tasks} tasks</li>
           </ul>
+          <h2>Activity timeline</h2>
+          {selected.activities?.length ? (
+            <ol className="activity-timeline">
+              {selected.activities.map((activity) => (
+                <li key={activity.id}>
+                  <span aria-hidden="true" />
+                  <article>
+                    <div>
+                      <strong>{activity.subject}</strong>
+                      <time dateTime={activity.occurredAt}>
+                        {new Date(activity.occurredAt).toLocaleString()}
+                      </time>
+                    </div>
+                    <p>{activity.body || "No summary recorded."}</p>
+                    <small>
+                      {activity.type.replace("_", " ")} ·{" "}
+                      {activity.creatorLabel}
+                    </small>
+                  </article>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>No activity recorded for this company.</p>
+          )}
           <h2>Change history</h2>
           {selected.history.length ? (
             <ol>
