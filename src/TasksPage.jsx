@@ -212,18 +212,25 @@ export function TasksPage({ role }) {
       .filter(([, value]) => value !== "" && value !== 1)
       .map(([key, value]) => [key, String(value)]),
   ).toString();
-  const load = async () => {
+  const queryRef = useRef(query);
+  const requestRef = useRef(0);
+  queryRef.current = query;
+  const load = async (requestedQuery = queryRef.current) => {
+    const request = ++requestRef.current;
     setState((current) => ({ ...current, status: "loading" }));
     try {
-      setState({ status: "ready", ...(await api(`/api/tasks?${query}`)) });
+      const result = await api(`/api/tasks?${requestedQuery}`);
+      if (request === requestRef.current)
+        setState({ status: "ready", ...result });
     } catch (error) {
-      setState({
-        status: error.status === 403 ? "forbidden" : "error",
-        items: [],
-        page: 1,
-        pages: 1,
-        total: 0,
-      });
+      if (request === requestRef.current)
+        setState({
+          status: error.status === 403 ? "forbidden" : "error",
+          items: [],
+          page: 1,
+          pages: 1,
+          total: 0,
+        });
     }
   };
   useEffect(() => {
@@ -254,7 +261,7 @@ export function TasksPage({ role }) {
           message: `Task ${action === "complete" ? "completed" : action === "reopen" ? "reopened" : action === "archive" ? "archived" : "restored"}.`,
         },
       ]);
-      await load();
+      await load(queryRef.current);
       return result.task;
     } catch (error) {
       setToast([
