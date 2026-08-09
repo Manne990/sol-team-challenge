@@ -187,12 +187,13 @@ function TaskForm({ task, members, onClose, onSaved }) {
 }
 
 export function TasksPage({ role }) {
-  const params = new URLSearchParams(location.hash.split("?")[1] || "");
+  const params = new URLSearchParams(location.search);
   const [filters, setFilters] = useState({
     view: params.get("view") || "open",
     assignedToMe: params.get("assignedToMe") || "",
     q: params.get("q") || "",
     priority: params.get("priority") || "",
+    dueBefore: params.get("dueBefore") || "",
     page: Number(params.get("page")) || 1,
   });
   const [state, setState] = useState({
@@ -226,7 +227,7 @@ export function TasksPage({ role }) {
     }
   };
   useEffect(() => {
-    history.replaceState(null, "", `#tasks${query ? `?${query}` : ""}`);
+    history.replaceState(null, "", `/tasks${query ? `?${query}` : ""}`);
     load();
   }, [query]);
   useEffect(() => {
@@ -369,6 +370,7 @@ export function TasksPage({ role }) {
             assignedToMe: "",
             q: "",
             priority: "",
+            dueBefore: "",
             page: 1,
             ...value,
           })

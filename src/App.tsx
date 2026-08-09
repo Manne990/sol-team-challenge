@@ -7,11 +7,7 @@ import {
 } from "react";
 import { AuthGate } from "./AuthGate";
 import { ActivitiesPage } from "./ActivitiesPage";
-import {
-  AppShell,
-  OperationalState,
-  WorkspacePreview,
-} from "./client/components";
+import { AppShell, OperationalState } from "./client/components";
 import { ContactsPage } from "./client/ContactsPage";
 import { ImportsPage } from "./client/ImportsPage";
 import { NotificationsPage } from "./client/NotificationsPage";
@@ -20,6 +16,8 @@ import { TasksPage } from "./TasksPage.jsx";
 // @ts-expect-error This shared JSX surface is validated by ESLint and browser tests.
 import { DealsPage } from "./DealsPage.jsx";
 import { DuplicatesPage } from "./DuplicatesPage.jsx";
+// @ts-expect-error This shared JSX surface is validated by component and browser tests.
+import { DashboardPage } from "./DashboardPage.jsx";
 import "./styles.css";
 import "./client/styles.css";
 
@@ -106,13 +104,17 @@ function Workspace({
       </AppShell>
     );
   return (
-    <WorkspacePreview
+    <AppShell
+      currentPath="/"
+      navigate={navigate}
       role={user.role}
       organizationName={user.organization.name}
       userName={user.name}
       userEmail={user.email}
       onSignOut={onSignOut}
-    />
+    >
+      <DashboardPage />
+    </AppShell>
   );
 }
 

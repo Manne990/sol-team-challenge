@@ -60,6 +60,9 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
   const [failure, setFailure] = useState("");
   const [query, setQuery] = useState("");
   const [lifecycle, setLifecycle] = useState("");
+  const [lastActivityBefore] = useState(
+    () => new URLSearchParams(location.search).get("lastActivityBefore") ?? "",
+  );
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CompanyDetail>();
   const [editing, setEditing] = useState(false);
@@ -78,6 +81,8 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
       });
       if (query) params.set("q", query);
       if (lifecycle) params.set("lifecycle", lifecycle);
+      if (lastActivityBefore)
+        params.set("lastActivityBefore", lastActivityBefore);
       setData(await request<ListResponse>(`/api/companies?${params}`));
     } catch (error) {
       setFailure(
@@ -86,11 +91,13 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
           : "Companies could not be loaded.",
       );
     }
-  }, [page, query, lifecycle]);
+  }, [page, query, lifecycle, lastActivityBefore]);
   useEffect(() => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
     if (lifecycle) params.set("lifecycle", lifecycle);
+    if (lastActivityBefore)
+      params.set("lastActivityBefore", lastActivityBefore);
     if (page > 1) params.set("page", String(page));
     history.replaceState(
       null,
@@ -98,7 +105,7 @@ export function CompaniesWorkspace({ role }: { role: UserRole }) {
       `/companies${params.size ? `?${params}` : ""}`,
     );
     void load();
-  }, [load, lifecycle, page, query]);
+  }, [lastActivityBefore, load, lifecycle, page, query]);
   async function open(company: Company) {
     try {
       const result = await request<{ company: CompanyDetail }>(

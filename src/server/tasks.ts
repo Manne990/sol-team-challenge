@@ -142,6 +142,10 @@ export class TaskStore {
       clauses.push("t.assignee_membership_id=?");
       args.push(query.assignee);
     }
+    if (typeof query.dueBefore === "string" && query.dueBefore) {
+      clauses.push("t.due_at<?");
+      args.push(query.dueBefore);
+    }
     for (const [key, column] of [
       ["company", "t.company_id"],
       ["contact", "t.contact_id"],

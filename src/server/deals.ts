@@ -131,6 +131,18 @@ export class DealStore {
       const q = `%${query.q.trim()}%`;
       args.push(q, q);
     }
+    if (typeof query.closeFrom === "string" && query.closeFrom) {
+      clauses.push("d.expected_close_date>=?");
+      args.push(query.closeFrom);
+    }
+    if (typeof query.closeTo === "string" && query.closeTo) {
+      clauses.push("d.expected_close_date<=?");
+      args.push(query.closeTo);
+    }
+    if (typeof query.updatedFrom === "string" && query.updatedFrom) {
+      clauses.push("d.updated_at>=?");
+      args.push(query.updatedFrom);
+    }
     const where = clauses.join(" AND "),
       page = Math.max(1, Number(query.page) || 1),
       pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 25));

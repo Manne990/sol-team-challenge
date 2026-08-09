@@ -19,6 +19,31 @@ test.beforeEach(async ({ page }) => {
       }),
     });
   });
+  await page.route("**/api/dashboard", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        generatedAt: "2026-08-09T08:00:00.000Z",
+        openPipeline: [],
+        closingSoon: [],
+        closingSoonHref: "/deals?status=open",
+        tasks: {
+          overdue: 0,
+          upcoming: 0,
+          overdueHref: "/tasks?view=overdue",
+          upcomingHref: "/tasks?view=upcoming",
+        },
+        staleAccounts: {
+          count: 0,
+          href: "/companies?lastActivityBefore=2026-07-10T08%3A00%3A00.000Z",
+          items: [],
+        },
+        stageDistribution: [],
+        wonLostTrend: [],
+        recentActivity: [],
+      }),
+    });
+  });
 });
 
 const viewports = [

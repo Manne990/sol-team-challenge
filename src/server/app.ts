@@ -21,8 +21,12 @@ import {
 import { tasksRouter } from "./tasks.js";
 import { dealsRouter } from "./deals.js";
 import { discoveryRouter } from "./discovery.js";
+import { dashboardRouter } from "./dashboard.js";
 
-export function createApp(database: SqliteDatabase) {
+export function createApp(
+  database: SqliteDatabase,
+  options: { clock?: () => Date } = {},
+) {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
@@ -35,6 +39,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/imports", importsRouter(database, auth));
   app.use("/api/notifications", notificationsRouter(database, auth));
   app.use("/api/deals", dealsRouter(database, auth));
+  app.use("/api/dashboard", dashboardRouter(database, auth, options.clock));
   app.use("/api", discoveryRouter(database, auth));
   app.use("/api/duplicates", mergesRouter(database, auth));
 
