@@ -29,7 +29,7 @@ const response = (body, ok = true, status = 200) =>
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
-  location.hash = "";
+  history.replaceState(null, "", "/tasks");
 });
 
 describe("TasksPage", () => {
@@ -53,7 +53,7 @@ describe("TasksPage", () => {
       await screen.findByRole("cell", { name: "2026-08-05 22:00" }),
     ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Overdue" }));
-    await waitFor(() => expect(location.hash).toContain("view=overdue"));
+    await waitFor(() => expect(location.search).toContain("view=overdue"));
     expect(
       screen.getByRole("checkbox", { name: "Assigned to me" }),
     ).toBeTruthy();

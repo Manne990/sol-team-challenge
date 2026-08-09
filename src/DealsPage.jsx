@@ -379,7 +379,7 @@ export function DealsPage({ role, user, dealId }) {
     [managingStages, setManagingStages] = useState(false),
     [view, setView] = useState("pipeline"),
     [filters, setFilters] = useState(
-      () => new URLSearchParams(location.hash.split("?")[1] || ""),
+      () => new URLSearchParams(location.search),
     );
   const canEdit = role !== "viewer";
   const load = () => {
@@ -572,7 +572,11 @@ export function DealsPage({ role, user, dealId }) {
         onApply={(value) => {
           const next = new URLSearchParams(value);
           setFilters(next);
-          location.hash = `deals${next.size ? `?${next}` : ""}`;
+          history.replaceState(
+            null,
+            "",
+            `/deals${next.size ? `?${next}` : ""}`,
+          );
         }}
       />
       <section className="panel">

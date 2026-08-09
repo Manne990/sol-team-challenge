@@ -10,20 +10,40 @@ afterEach(() => {
 test("shows a connected operational workspace", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        user: {
-          id: "user-owner",
-          membershipId: "member-owner",
-          email: "owner@northstar.test",
-          name: "Northstar Owner",
-          role: "owner",
-          organization: { id: "org-northstar", name: "Northstar Demo" },
-          sessionExpiresAt: "2026-08-10T00:00:00.000Z",
-        },
+    vi.fn().mockImplementation((input: RequestInfo | URL) =>
+      Promise.resolve({
+        ok: true,
+        json: async () =>
+          String(input).includes("/api/dashboard")
+            ? {
+                generatedAt: "2026-08-05T12:00:00.000Z",
+                openPipeline: [],
+                closingSoon: [],
+                closingSoonHref: "/deals",
+                tasks: {
+                  overdue: 0,
+                  upcoming: 0,
+                  overdueHref: "/tasks",
+                  upcomingHref: "/tasks",
+                },
+                staleAccounts: { count: 0, items: [], href: "/companies" },
+                stageDistribution: [],
+                wonLostTrend: [],
+                recentActivity: [],
+              }
+            : {
+                user: {
+                  id: "user-owner",
+                  membershipId: "member-owner",
+                  email: "owner@northstar.test",
+                  name: "Northstar Owner",
+                  role: "owner",
+                  organization: { id: "org-northstar", name: "Northstar Demo" },
+                  sessionExpiresAt: "2026-08-10T00:00:00.000Z",
+                },
+              },
       }),
-    }),
+    ),
   );
   render(<App />);
   expect(screen.getByText(/Loading your workspace/)).toBeTruthy();

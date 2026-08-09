@@ -194,6 +194,14 @@ export class CompanyService {
       const term = `%${query.q.trim().replace(/[\\%_]/gu, "\\$&")}%`;
       params.push(term, term, term);
     }
+    if (
+      typeof query.lastActivityBefore === "string" &&
+      query.lastActivityBefore
+    ) {
+      conditions.push(`NOT EXISTS(SELECT 1 FROM activities a WHERE a.organization_id=c.organization_id
+        AND a.company_id=c.id AND a.occurred_at>=?)`);
+      params.push(query.lastActivityBefore);
+    }
     const allowedSort: Record<string, string> = {
       name: "c.name",
       updatedAt: "c.updated_at",
