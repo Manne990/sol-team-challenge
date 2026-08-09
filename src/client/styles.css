@@ -1230,6 +1230,56 @@ a {
     grid-template-columns: 1fr;
   }
 }
+.duplicate-list {
+  display: grid;
+  gap: 0.9rem;
+}
+.duplicate-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+.duplicate-card h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+.duplicate-card p {
+  margin: 0;
+  color: var(--ns-muted);
+}
+.merge-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+.merge-fields fieldset {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  border: 1px solid var(--ns-border);
+  border-radius: 5px;
+}
+.merge-fields legend {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.merge-fields label {
+  overflow-wrap: anywhere;
+  font-size: 0.75rem;
+}
+.merge-review > .form-actions {
+  padding: 0 1.25rem 1.25rem;
+}
+@media (max-width: 640px) {
+  .duplicate-card,
+  .merge-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
 .task-views {
   display: flex;
   gap: 0.25rem;

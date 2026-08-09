@@ -12,6 +12,7 @@ import { SqliteAuthStore } from "./auth/sqlite-store.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { importsRouter } from "./imports.js";
 import { notificationsRouter } from "./notifications.js";
+import { mergesRouter } from "./merges.js";
 import {
   CompanyService,
   companyErrorHandler,
@@ -35,6 +36,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/notifications", notificationsRouter(database, auth));
   app.use("/api/deals", dealsRouter(database, auth));
   app.use("/api", discoveryRouter(database, auth));
+  app.use("/api/duplicates", mergesRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {

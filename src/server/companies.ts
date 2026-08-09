@@ -271,6 +271,18 @@ export class CompanyService {
       activities,
     };
   }
+  resolve(user: AuthenticatedUser | undefined, id: string) {
+    const actor = this.require(user, ["owner", "member", "viewer"]);
+    const redirect = this.db
+      .prepare(
+        "SELECT survivor_id FROM merge_redirects WHERE organization_id=? AND entity_type='company' AND retired_id=?",
+      )
+      .get(actor.organization.id, id) as Row | undefined;
+    return {
+      id: redirect ? String(redirect.survivor_id) : id,
+      redirectedFrom: redirect ? id : null,
+    };
+  }
   create(user: AuthenticatedUser | undefined, value: unknown) {
     const actor = this.require(user, ["owner", "member"]);
     const input = validateCompany(value);
@@ -460,8 +472,10 @@ export function companyRouter(service: CompanyService, auth: AuthService) {
   });
   router.get("/:id", (req: AuthedRequest, res, next) => {
     try {
+      const resolved = service.resolve(req.authUser, String(req.params.id));
       res.json({
-        company: service.detail(req.authUser, String(req.params.id)),
+        company: service.detail(req.authUser, resolved.id),
+        redirectedFrom: resolved.redirectedFrom,
       });
     } catch (e) {
       next(e);
