@@ -13,6 +13,7 @@ import {
 } from "./client/components";
 import { ContactsPage } from "./client/ContactsPage";
 import { CompaniesWorkspace } from "./client/components/CompaniesWorkspace";
+import { TasksPage } from "./TasksPage.jsx";
 import "./styles.css";
 import "./client/styles.css";
 
@@ -43,10 +44,20 @@ function Workspace({
     history.pushState(null, "", href);
     setPath(href);
   };
-  if (path.startsWith("/contacts") || path.startsWith("/companies"))
+  if (
+    path.startsWith("/contacts") ||
+    path.startsWith("/companies") ||
+    path.startsWith("/tasks")
+  )
     return (
       <AppShell
-        currentPath={path.startsWith("/contacts") ? "/contacts" : "/companies"}
+        currentPath={
+          path.startsWith("/contacts")
+            ? "/contacts"
+            : path.startsWith("/tasks")
+              ? "/tasks"
+              : "/companies"
+        }
         navigate={navigate}
         role={user.role}
         organizationName={user.organization.name}
@@ -56,6 +67,8 @@ function Workspace({
       >
         {path.startsWith("/contacts") ? (
           <ContactsPage role={user.role} />
+        ) : path.startsWith("/tasks") ? (
+          <TasksPage role={user.role} />
         ) : (
           <CompaniesWorkspace role={user.role} />
         )}

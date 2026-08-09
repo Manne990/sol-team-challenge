@@ -10,7 +10,7 @@ import type { AuthStore } from "./types.js";
 
 export class AuthError extends Error {
   constructor(
-    public readonly status: 400 | 401 | 403 | 409,
+    public readonly status: 400 | 401 | 403 | 404 | 409,
     public readonly code: string,
     message: string,
   ) {
