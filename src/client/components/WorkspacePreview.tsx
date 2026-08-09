@@ -9,14 +9,29 @@ import {
   TextInput,
 } from "./ui";
 
-export function WorkspacePreview({ role = "owner" }: { role?: UserRole }) {
+interface WorkspacePreviewProps {
+  role?: UserRole;
+  organizationName?: string;
+  userName?: string;
+  userEmail?: string;
+  onSignOut?: () => void;
+}
+
+export function WorkspacePreview({
+  role = "owner",
+  organizationName,
+  userName,
+  userEmail,
+  onSignOut,
+}: WorkspacePreviewProps) {
   return (
     <AppShell
       currentPath="/"
       role={role}
-      organizationName="Northstar Demo"
-      userName="Morgan Lee"
-      userEmail="owner@northstar.test"
+      organizationName={organizationName}
+      userName={userName}
+      userEmail={userEmail}
+      onSignOut={onSignOut}
     >
       <PageHeader
         eyebrow="Today"
