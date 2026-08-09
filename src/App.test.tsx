@@ -17,7 +17,7 @@ test("shows a connected operational workspace", async () => {
   render(<App />);
   expect(screen.getByText(/Loading Northstar/)).toBeTruthy();
   expect(
-    await screen.findByRole("heading", { name: /operational workspace/i }),
+    await screen.findByRole("heading", { name: "Dashboard" }),
   ).toBeTruthy();
 });
 

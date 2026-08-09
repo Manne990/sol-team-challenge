@@ -6,7 +6,9 @@ import {
   useState,
 } from "react";
 import type { HealthResponse } from "./shared/api";
+import { OperationalState, WorkspacePreview } from "./client/components";
 import "./styles.css";
+import "./client/styles.css";
 
 type Status = "loading" | "ready" | "unavailable";
 
@@ -31,22 +33,23 @@ export function App() {
   }, []);
 
   if (status === "loading")
-    return <main aria-busy="true">Loading Northstar CRM…</main>;
+    return (
+      <main aria-busy="true">
+        <OperationalState kind="loading" message="Loading Northstar CRM…" />
+      </main>
+    );
   if (status === "unavailable") {
     return (
       <main>
-        <h1>Northstar CRM is unavailable</h1>
-        <p>Check the server connection, then refresh this page.</p>
+        <OperationalState
+          kind="error"
+          title="Northstar CRM is unavailable"
+          message="Check the server connection, then refresh this page."
+        />
       </main>
     );
   }
-  return (
-    <main>
-      <p className="eyebrow">Northstar CRM</p>
-      <h1>Your operational workspace is ready</h1>
-      <p>The application foundation is connected and ready for CRM features.</p>
-    </main>
-  );
+  return <WorkspacePreview />;
 }
 
 interface ErrorBoundaryProps {
@@ -74,8 +77,11 @@ export class ErrorBoundary extends Component<
     if (this.state.failed) {
       return (
         <main>
-          <h1>Something went wrong</h1>
-          <p>Refresh the page to try again.</p>
+          <OperationalState
+            kind="error"
+            title="Something went wrong"
+            message="Refresh the page to try again."
+          />
         </main>
       );
     }
