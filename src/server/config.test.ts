@@ -15,6 +15,13 @@ describe("runtime configuration", () => {
     );
   });
 
+  it("allows the browser harness to request an atomic ephemeral port", () => {
+    const config = loadConfig(["--port", "0"], {
+      NORTHSTAR_TEST_EPHEMERAL_PORT: "1",
+    });
+    expect(config.port).toBe(0);
+  });
+
   it("rejects an empty database path", () => {
     expect(() => loadConfig([], { NORTHSTAR_DB_PATH: " " })).toThrow(
       "Invalid NORTHSTAR_DB_PATH",

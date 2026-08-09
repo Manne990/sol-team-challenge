@@ -2,12 +2,14 @@ import { spawn, spawnSync } from "node:child_process";
 import { createTestRuntime } from "../tests/support/test-runtime.mjs";
 
 const runtime = await createTestRuntime();
-let child;
+let browser;
+let server;
 let stopping = false;
 const stop = async (signal) => {
   if (stopping) return;
   stopping = true;
-  if (child && !child.killed) child.kill(signal);
+  if (browser && !browser.killed) browser.kill(signal);
+  if (server && !server.killed) server.kill(signal);
   await runtime.dispose();
 };
 for (const signal of ["SIGINT", "SIGTERM"]) {
@@ -30,21 +32,63 @@ try {
     if (setup.status !== 0)
       throw new Error(`${command} failed for the browser database`);
   }
-  child = spawn(
+
+  server = spawn(
+    "npm",
+    ["run", "dev", "--", "--host", "127.0.0.1", "--port", "0"],
+    {
+      stdio: ["ignore", "pipe", "inherit"],
+      env: {
+        ...databaseEnvironment,
+        NORTHSTAR_TEST_EPHEMERAL_PORT: "1",
+      },
+    },
+  );
+  server.stdout.pipe(process.stdout);
+  const port = await new Promise((resolve, reject) => {
+    const timeout = setTimeout(
+      () => reject(new Error("Timed out waiting for the browser server")),
+      30_000,
+    );
+    let output = "";
+    const fail = (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    };
+    server.once("error", fail);
+    server.once("exit", (code, signal) =>
+      fail(
+        new Error(
+          `Browser server exited before startup (${code ?? signal ?? "unknown"})`,
+        ),
+      ),
+    );
+    server.stdout.on("data", (chunk) => {
+      output += chunk.toString();
+      const match = output.match(
+        /Northstar CRM listening at http:\/\/127\.0\.0\.1:(\d+)/u,
+      );
+      if (!match) return;
+      clearTimeout(timeout);
+      resolve(Number(match[1]));
+    });
+  });
+
+  browser = spawn(
     process.execPath,
     ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)],
     {
       stdio: "inherit",
       env: {
         ...process.env,
-        NORTHSTAR_TEST_PORT: String(runtime.port),
-        NORTHSTAR_TEST_DATABASE_PATH: runtime.databasePath,
+        NORTHSTAR_TEST_PORT: String(port),
+        NORTHSTAR_TEST_OUTPUT_DIR: `${runtime.directory}/playwright-results`,
       },
     },
   );
   const exitCode = await new Promise((resolve, reject) => {
-    child.once("error", reject);
-    child.once("exit", (code, signal) => resolve(code ?? (signal ? 1 : 0)));
+    browser.once("error", reject);
+    browser.once("exit", (code, signal) => resolve(code ?? (signal ? 1 : 0)));
   });
   process.exitCode = exitCode;
 } finally {

@@ -15,6 +15,7 @@ async function main() {
   const app = createApp(
     database as unknown as import("./auth/sqlite-store.js").SqliteDatabase,
   );
+  const server = createServer(app);
   if (config.production) {
     const root = path.resolve("dist/client");
     const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
@@ -24,20 +25,22 @@ async function main() {
     );
   } else {
     const vite = await createViteServer({
-      server: { middlewareMode: true, hmr: false },
+      server: { middlewareMode: true, ws: { server } },
       appType: "spa",
     });
     app.use(vite.middlewares);
   }
 
-  const server = createServer(app);
   server.on("error", (error) => {
     console.error("Northstar failed to start", error);
     process.exitCode = 1;
   });
   server.listen(config.port, config.host, () => {
+    const address = server.address();
+    const boundPort =
+      typeof address === "object" && address ? address.port : config.port;
     console.log(
-      `Northstar CRM listening at http://${config.host}:${config.port}`,
+      `Northstar CRM listening at http://${config.host}:${boundPort}`,
     );
     console.log(`Database path: ${config.databasePath}`);
   });
