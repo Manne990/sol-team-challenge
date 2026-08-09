@@ -5,6 +5,7 @@ import express, {
 } from "express";
 import type { ApiErrorBody, HealthResponse } from "../shared/api.js";
 import type { SqliteDatabase } from "./auth/sqlite-store.js";
+import { activitiesRouter } from "./activities.js";
 import { authErrorHandler, authRouter } from "./auth/routes.js";
 import { AuthService } from "./auth/service.js";
 import { SqliteAuthStore } from "./auth/sqlite-store.js";
@@ -25,6 +26,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/contacts", contactsRouter(database, auth));
   app.use("/api/companies", companyRouter(new CompanyService(database), auth));
   app.use("/api/tasks", tasksRouter(database, auth));
+  app.use("/api/activities", activitiesRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {

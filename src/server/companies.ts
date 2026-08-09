@@ -254,6 +254,11 @@ export class CompanyService {
         unknown
       >,
     }));
+    const activities = this.db
+      .prepare(
+        "SELECT id,type,subject,body,occurred_at occurredAt,creator_label creatorLabel,follow_up_task_id followUpTaskId FROM activities WHERE organization_id=? AND company_id=? ORDER BY occurred_at DESC,id DESC LIMIT 50",
+      )
+      .all(actor.organization.id, id) as Row[];
     return {
       ...this.map(row),
       relatedCounts: {
@@ -263,6 +268,7 @@ export class CompanyService {
         tasks: count("tasks"),
       },
       history,
+      activities,
     };
   }
   create(user: AuthenticatedUser | undefined, value: unknown) {

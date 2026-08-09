@@ -921,3 +921,110 @@ a {
     grid-column: auto;
   }
 }
+.page-heading,
+.panel__heading,
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.page-heading {
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+.page-heading h1,
+.panel__heading h2 {
+  margin: 0.2rem 0;
+}
+.page-heading p,
+.panel__heading p,
+.activity-timeline small,
+.activity-timeline time {
+  color: var(--ns-muted);
+}
+.panel__heading,
+.form-actions {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--ns-border);
+}
+.activity-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+.activity-form__grid label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+.activity-form__grid input,
+.activity-form__grid select,
+.activity-form__grid textarea {
+  min-height: 40px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #8998a5;
+  border-radius: 5px;
+}
+.activity-form__grid textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.activity-form__grid .wide {
+  grid-column: 1 / -1;
+}
+.activity-form__grid .follow-up-check {
+  display: flex;
+  align-items: center;
+}
+.follow-up-check input {
+  min-height: auto;
+}
+.form-actions {
+  justify-content: flex-end;
+  border-top: 1px solid var(--ns-border);
+  border-bottom: 0;
+}
+.activity-timeline {
+  margin: 0;
+  padding: 0 1.25rem;
+  list-style: none;
+}
+.activity-timeline li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.activity-timeline li > span {
+  width: 10px;
+  height: 10px;
+  margin-top: 1.3rem;
+  background: var(--ns-teal);
+  border-radius: 50%;
+}
+.activity-timeline article {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--ns-border);
+}
+.activity-timeline article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.activity-timeline p {
+  margin: 0.45rem 0;
+}
+@media (max-width: 600px) {
+  .page-heading,
+  .activity-timeline article > div {
+    display: grid;
+  }
+  .activity-form__grid {
+    grid-template-columns: 1fr;
+  }
+  .activity-form__grid .wide {
+    grid-column: auto;
+  }
+}
