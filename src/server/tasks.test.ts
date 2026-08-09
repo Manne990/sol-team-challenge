@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import Database from "better-sqlite3";
