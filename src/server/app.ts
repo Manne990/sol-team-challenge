@@ -11,6 +11,7 @@ import { AuthService } from "./auth/service.js";
 import { SqliteAuthStore } from "./auth/sqlite-store.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { importsRouter } from "./imports.js";
+import { notificationsRouter } from "./notifications.js";
 import {
   CompanyService,
   companyErrorHandler,
@@ -31,6 +32,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/tasks", tasksRouter(database, auth));
   app.use("/api/activities", activitiesRouter(database, auth));
   app.use("/api/imports", importsRouter(database, auth));
+  app.use("/api/notifications", notificationsRouter(database, auth));
   app.use("/api/deals", dealsRouter(database, auth));
   app.use("/api", discoveryRouter(database, auth));
 
