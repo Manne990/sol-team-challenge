@@ -68,6 +68,14 @@ export class SqliteAuthStore implements AuthStore {
         input.expiresAt,
         now,
       );
+    this.audit(
+      input.organizationId,
+      input.userId,
+      "authentication.signed_in",
+      String(membership.id),
+      {},
+      now,
+    );
   }
 
   async findSession(
@@ -102,11 +110,32 @@ export class SqliteAuthStore implements AuthStore {
   }
 
   async revokeSession(tokenHash: string, now: string) {
+    const session = this.db
+      .prepare(
+        "SELECT organization_id,membership_id FROM sessions WHERE token_hash=?",
+      )
+      .get(tokenHash) as Row | undefined;
     this.db
       .prepare(
         "UPDATE sessions SET revoked_at=COALESCE(revoked_at,?) WHERE token_hash=?",
       )
       .run(now, tokenHash);
+    if (session) {
+      const actor = this.db
+        .prepare(
+          "SELECT user_id FROM memberships WHERE id=? AND organization_id=?",
+        )
+        .get(session.membership_id, session.organization_id) as Row | undefined;
+      if (actor)
+        this.audit(
+          String(session.organization_id),
+          String(actor.user_id),
+          "authentication.signed_out",
+          String(session.membership_id),
+          {},
+          now,
+        );
+    }
   }
 
   async listMembers(organizationId: string) {
@@ -324,7 +353,7 @@ export class SqliteAuthStore implements AuthStore {
         organizationId,
         actor?.id ?? null,
         action,
-        "membership",
+        action.startsWith("authentication.") ? "authentication" : "membership",
         entityId,
         randomUUID(),
         JSON.stringify(summary),

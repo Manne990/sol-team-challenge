@@ -12,6 +12,7 @@ import { SqliteAuthStore } from "./auth/sqlite-store.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { importsRouter } from "./imports.js";
 import { notificationsRouter } from "./notifications.js";
+import { governanceRouter } from "./governance.js";
 import { mergesRouter } from "./merges.js";
 import {
   CompanyService,
@@ -38,6 +39,7 @@ export function createApp(
   app.use("/api/activities", activitiesRouter(database, auth));
   app.use("/api/imports", importsRouter(database, auth));
   app.use("/api/notifications", notificationsRouter(database, auth));
+  app.use("/api/governance", governanceRouter(database, auth));
   app.use("/api/deals", dealsRouter(database, auth));
   app.use("/api/dashboard", dashboardRouter(database, auth, options.clock));
   app.use("/api", discoveryRouter(database, auth));

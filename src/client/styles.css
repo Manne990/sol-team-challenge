@@ -1088,6 +1088,30 @@ a {
     grid-template-columns: 1fr;
   }
 }
+.ns-admin-panel {
+  max-width: 1280px;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+  background: var(--ns-surface);
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
+.ns-admin-panel h2 {
+  margin: 0 0 0.8rem;
+}
+.ns-admin-panel > p {
+  color: var(--ns-muted);
+  font-size: 0.82rem;
+}
+.ns-admin-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  gap: 0.8rem;
+}
+.ns-admin-form .ns-button {
+  justify-self: start;
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
