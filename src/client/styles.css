@@ -770,3 +770,52 @@ a {
     border: 1px solid currentColor;
   }
 }
+.ns-table-link {
+  border: 0;
+  background: none;
+  color: #145c43;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+}
+.ns-company-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+.ns-company-facts div {
+  border-bottom: 1px solid var(--ns-border);
+  padding-bottom: 0.75rem;
+}
+.ns-company-facts dt {
+  color: var(--ns-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.ns-company-facts dd {
+  margin: 0.35rem 0 0;
+}
+.ns-related-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  padding-left: 1.25rem;
+}
+.ns-company-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.ns-company-form .ns-dialog-actions,
+.ns-company-form .ns-field:last-of-type {
+  grid-column: 1 / -1;
+}
+@media (max-width: 600px) {
+  .ns-company-form {
+    grid-template-columns: 1fr;
+  }
+}

@@ -12,6 +12,7 @@ import {
   WorkspacePreview,
 } from "./client/components";
 import { ContactsPage } from "./client/ContactsPage";
+import { CompaniesWorkspace } from "./client/components/CompaniesWorkspace";
 import "./styles.css";
 import "./client/styles.css";
 
@@ -42,10 +43,10 @@ function Workspace({
     history.pushState(null, "", href);
     setPath(href);
   };
-  if (path.startsWith("/contacts"))
+  if (path.startsWith("/contacts") || path.startsWith("/companies"))
     return (
       <AppShell
-        currentPath="/contacts"
+        currentPath={path.startsWith("/contacts") ? "/contacts" : "/companies"}
         navigate={navigate}
         role={user.role}
         organizationName={user.organization.name}
@@ -53,7 +54,11 @@ function Workspace({
         userEmail={user.email}
         onSignOut={onSignOut}
       >
-        <ContactsPage role={user.role} />
+        {path.startsWith("/contacts") ? (
+          <ContactsPage role={user.role} />
+        ) : (
+          <CompaniesWorkspace role={user.role} />
+        )}
       </AppShell>
     );
   return (
