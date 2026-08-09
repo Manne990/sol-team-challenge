@@ -554,6 +554,231 @@ a {
   background: #fff0c7;
   border-left: 3px solid #a56b00;
 }
+.page-heading,
+.panel {
+  max-width: 1280px;
+  margin: 0 auto 1rem;
+}
+.page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.page-heading h1 {
+  margin: 0;
+}
+.heading-actions,
+.form-actions,
+.dialog__actions,
+.view-switch {
+  display: flex;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+.button {
+  min-height: 38px;
+  padding: 0.48rem 0.85rem;
+  color: #fff;
+  background: var(--ns-teal);
+  border: 1px solid var(--ns-teal);
+  border-radius: 5px;
+  font-weight: 680;
+  cursor: pointer;
+}
+.button--quiet {
+  color: var(--ns-teal-dark);
+  background: transparent;
+}
+.button--danger {
+  background: var(--ns-danger);
+  border-color: var(--ns-danger);
+}
+.panel {
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
+.filters {
+  display: flex;
+  align-items: end;
+  gap: 0.7rem;
+  padding: 0.8rem;
+}
+.filters label,
+.company-form label,
+.stage-create label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+.filters input,
+.filters select,
+.company-form input,
+.company-form select,
+.stage-create input,
+.stage-create select,
+.dialog input,
+.dialog select {
+  min-height: 39px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #abb6bf;
+  border-radius: 5px;
+}
+.company-form {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.2rem;
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
+.company-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.company-form__grid .wide {
+  grid-column: 1 / -1;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.table-scroll table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+.table-scroll caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.table-scroll th,
+.table-scroll td {
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #e4e8eb;
+  text-align: left;
+}
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(210px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+.pipeline-column {
+  min-height: 220px;
+  padding: 0.7rem;
+  background: #f4f6f8;
+  border: 1px solid var(--ns-border);
+  border-radius: 6px;
+}
+.pipeline-column h2 {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  margin: 0 0 0.7rem;
+  font-size: 0.82rem;
+}
+.pipeline-column h2 > span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.pipeline-column h2 small {
+  margin-left: auto;
+}
+.pipeline-column article {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.55rem;
+  padding: 0.7rem;
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 5px;
+  font-size: 0.78rem;
+}
+.non-drag-move {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+}
+.dialog-backdrop {
+  position: fixed;
+  z-index: 160;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(12 24 34 / 0.58);
+}
+.dialog {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.2rem;
+  background: #fff;
+  border-radius: 8px;
+}
+.stage-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 240px;
+  overflow: auto;
+}
+.stage-list > div {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem;
+  border-bottom: 1px solid var(--ns-border);
+}
+.stage-list > div > span:first-child {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.stage-create {
+  display: grid;
+  grid-template-columns: 2fr auto 1fr auto;
+  align-items: end;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+.company-detail,
+.panel__heading {
+  padding: 1rem;
+}
+.company-detail dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.company-detail dt {
+  color: var(--ns-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.company-detail dd {
+  margin: 0.2rem 0 0;
+}
+.history {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 2rem 1rem;
+}
+.history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.state {
+  padding: 2rem;
+  text-align: center;
+}
 .ns-state {
   max-width: 620px;
   margin: 3rem auto;
@@ -751,6 +976,26 @@ a {
     padding-inline: 0.6rem;
   }
   .ns-contact-form {
+    grid-template-columns: 1fr;
+  }
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .pipeline {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+  .pipeline-column {
+    min-height: 0;
+  }
+  .company-form__grid,
+  .company-detail dl,
+  .stage-create {
     grid-template-columns: 1fr;
   }
 }

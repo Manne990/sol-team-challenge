@@ -17,6 +17,7 @@ import {
   companyRouter,
 } from "./companies.js";
 import { tasksRouter } from "./tasks.js";
+import { dealsRouter } from "./deals.js";
 
 export function createApp(database: SqliteDatabase) {
   const app = express();
@@ -29,6 +30,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/tasks", tasksRouter(database, auth));
   app.use("/api/activities", activitiesRouter(database, auth));
   app.use("/api/imports", importsRouter(database, auth));
+  app.use("/api/deals", dealsRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {
