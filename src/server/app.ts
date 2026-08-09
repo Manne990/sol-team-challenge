@@ -4,11 +4,19 @@ import express, {
   type RequestHandler,
 } from "express";
 import type { ApiErrorBody, HealthResponse } from "../shared/api.js";
+import type { SqliteDatabase } from "./auth/sqlite-store.js";
+import { authErrorHandler, authRouter } from "./auth/routes.js";
+import { AuthService } from "./auth/service.js";
+import { SqliteAuthStore } from "./auth/sqlite-store.js";
 
-export function createApp() {
+export function createApp(database: SqliteDatabase) {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
+  app.use(
+    "/api/auth",
+    authRouter(new AuthService(new SqliteAuthStore(database))),
+  );
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {
@@ -31,6 +39,7 @@ export function createApp() {
     response.status(404).json(body);
   };
   app.use(notFound);
+  app.use(authErrorHandler);
 
   const errors: ErrorRequestHandler = (error, _request, response, _next) => {
     const requestId = randomUUID();

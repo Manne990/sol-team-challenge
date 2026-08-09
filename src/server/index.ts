@@ -5,12 +5,16 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
+import { openProductDatabase } from "./database.js";
 
 async function main() {
   const config = loadConfig();
   fs.mkdirSync(path.dirname(config.databasePath), { recursive: true });
 
-  const app = createApp();
+  const database = openProductDatabase(config.databasePath);
+  const app = createApp(
+    database as unknown as import("./auth/sqlite-store.js").SqliteDatabase,
+  );
   if (config.production) {
     const root = path.resolve("dist/client");
     const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
@@ -38,7 +42,11 @@ async function main() {
     console.log(`Database path: ${config.databasePath}`);
   });
 
-  const shutdown = () => server.close(() => process.exit(0));
+  const shutdown = () =>
+    server.close(() => {
+      database.close();
+      process.exit(0);
+    });
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);
 }
