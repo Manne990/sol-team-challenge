@@ -1,6 +1,17 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  useEffect,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+} from "react";
 import { AuthGate } from "./AuthGate";
-import { OperationalState, WorkspacePreview } from "./client/components";
+import {
+  AppShell,
+  OperationalState,
+  WorkspacePreview,
+} from "./client/components";
+import { ContactsPage } from "./client/ContactsPage";
 import "./styles.css";
 import "./client/styles.css";
 
@@ -8,15 +19,51 @@ export function App() {
   return (
     <AuthGate>
       {(user, signOut) => (
-        <WorkspacePreview
-          role={user.role}
-          organizationName={user.organization.name}
-          userName={user.name}
-          userEmail={user.email}
-          onSignOut={() => void signOut()}
-        />
+        <Workspace user={user} onSignOut={() => void signOut()} />
       )}
     </AuthGate>
+  );
+}
+
+function Workspace({
+  user,
+  onSignOut,
+}: {
+  user: import("./shared/auth").AuthenticatedUser;
+  onSignOut: () => void;
+}) {
+  const [path, setPath] = useState(location.pathname);
+  useEffect(() => {
+    const changed = () => setPath(location.pathname);
+    addEventListener("popstate", changed);
+    return () => removeEventListener("popstate", changed);
+  }, []);
+  const navigate = (href: string) => {
+    history.pushState(null, "", href);
+    setPath(href);
+  };
+  if (path.startsWith("/contacts"))
+    return (
+      <AppShell
+        currentPath="/contacts"
+        navigate={navigate}
+        role={user.role}
+        organizationName={user.organization.name}
+        userName={user.name}
+        userEmail={user.email}
+        onSignOut={onSignOut}
+      >
+        <ContactsPage role={user.role} />
+      </AppShell>
+    );
+  return (
+    <WorkspacePreview
+      role={user.role}
+      organizationName={user.organization.name}
+      userName={user.name}
+      userEmail={user.email}
+      onSignOut={onSignOut}
+    />
   );
 }
 

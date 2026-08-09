@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createTestRuntime } from "../tests/support/test-runtime.mjs";
 
 const runtime = await createTestRuntime();
@@ -18,10 +18,30 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 }
 
 try {
-  child = spawn(process.execPath, ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)], {
-    stdio: "inherit",
-    env: { ...process.env, NORTHSTAR_TEST_PORT: String(runtime.port), NORTHSTAR_TEST_DATABASE_PATH: runtime.databasePath },
-  });
+  const databaseEnvironment = {
+    ...process.env,
+    NORTHSTAR_DB_PATH: runtime.databasePath,
+  };
+  for (const command of ["db:reset", "db:seed"]) {
+    const setup = spawnSync("npm", ["run", command], {
+      stdio: "inherit",
+      env: databaseEnvironment,
+    });
+    if (setup.status !== 0)
+      throw new Error(`${command} failed for the browser database`);
+  }
+  child = spawn(
+    process.execPath,
+    ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)],
+    {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        NORTHSTAR_TEST_PORT: String(runtime.port),
+        NORTHSTAR_TEST_DATABASE_PATH: runtime.databasePath,
+      },
+    },
+  );
   const exitCode = await new Promise((resolve, reject) => {
     child.once("error", reject);
     child.once("exit", (code, signal) => resolve(code ?? (signal ? 1 : 0)));
