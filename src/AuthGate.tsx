@@ -107,13 +107,15 @@ export function AuthGate({ children }: AuthGateProps) {
       signal: controller.signal,
     })
       .then(async (response): Promise<AuthState> =>
-        response.ok
-          ? {
-              status: "ready",
-              user: ((await response.json()) as { user: AuthenticatedUser })
-                .user,
-            }
-          : { status: "anonymous" },
+        response.status === 204
+          ? { status: "anonymous" }
+          : response.ok
+            ? {
+                status: "ready",
+                user: ((await response.json()) as { user: AuthenticatedUser })
+                  .user,
+              }
+            : { status: "anonymous" },
       )
       .then(setState)
       .catch((error: unknown) => {

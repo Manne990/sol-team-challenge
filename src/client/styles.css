@@ -1338,6 +1338,20 @@ a {
 .ns-company-form .ns-field:last-of-type {
   grid-column: 1 / -1;
 }
+.ns-conflict-review {
+  grid-column: 1 / -1;
+  padding: 0.85rem 1rem;
+  color: #5f3b00;
+  background: #fff7df;
+  border-left: 4px solid #b7791f;
+}
+.ns-conflict-review h3,
+.ns-conflict-review p {
+  margin: 0;
+}
+.ns-conflict-review p {
+  margin-top: 0.35rem;
+}
 @media (max-width: 600px) {
   .ns-company-form {
     grid-template-columns: 1fr;

@@ -100,6 +100,7 @@ export function ContactsPage({ role }: { role: Role }) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [form, setForm] = useState<FormState | null>(null);
   const [editing, setEditing] = useState<Contact | null>(null);
+  const [conflict, setConflict] = useState<Contact | null>(null);
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [notice, setNotice] = useState("");
@@ -139,6 +140,7 @@ export function ContactsPage({ role }: { role: Role }) {
   }
   function openForm(contact?: Contact) {
     setEditing(contact ?? null);
+    setConflict(null);
     setError("");
     setForm(
       contact
@@ -180,10 +182,19 @@ export function ContactsPage({ role }: { role: Role }) {
         { method: editing ? "PUT" : "POST", body: JSON.stringify(payload) },
       );
       setForm(null);
+      setConflict(null);
       setNotice(result.warnings?.[0]?.message ?? "Contact saved.");
       await load();
       await openContact(result.contact.id);
     } catch (failure) {
+      const response = failure as Error & {
+        status?: number;
+        body?: { contact?: Contact };
+      };
+      if (response.status === 409 && response.body?.contact) {
+        setConflict(response.body.contact);
+        setEditing(response.body.contact);
+      }
       setError(
         failure instanceof Error ? failure.message : "Could not save contact.",
       );
@@ -385,6 +396,16 @@ export function ContactsPage({ role }: { role: Role }) {
               <p role="alert" className="ns-form-error">
                 {error}
               </p>
+            )}
+            {conflict && (
+              <section className="ns-conflict-review" role="status">
+                <h3>Review the latest saved version</h3>
+                <p>
+                  Latest server value: <strong>{conflict.name}</strong>. Your
+                  draft remains in the form; saving again applies it to version{" "}
+                  {conflict.version}.
+                </p>
+              </section>
             )}
             {(
               [
