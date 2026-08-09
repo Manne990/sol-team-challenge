@@ -6,21 +6,31 @@ import { DatabaseSync } from "node:sqlite";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 export function databasePath() {
-  return resolve(process.env.NORTHSTAR_DB_PATH || resolve(root, "data/northstar.sqlite"));
+  return resolve(
+    process.env.NORTHSTAR_DB_PATH || resolve(root, "data/northstar.sqlite"),
+  );
 }
 
 export function openDatabase(path = databasePath()) {
   if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
-  db.exec("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;");
+  db.exec(
+    "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;",
+  );
   return db;
 }
 
 export function migrate(db, migrationsDirectory = resolve(root, "migrations")) {
-  db.exec("CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY, applied_at TEXT NOT NULL) STRICT");
+  db.exec(
+    "CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY, applied_at TEXT NOT NULL) STRICT",
+  );
   const applied = db.prepare("SELECT 1 FROM schema_migrations WHERE version=?");
-  const record = db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)");
-  for (const name of readdirSync(migrationsDirectory).filter((x) => x.endsWith(".sql")).sort()) {
+  const record = db.prepare(
+    "INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)",
+  );
+  for (const name of readdirSync(migrationsDirectory)
+    .filter((x) => x.endsWith(".sql"))
+    .sort()) {
     if (applied.get(name)) continue;
     db.exec("BEGIN IMMEDIATE");
     try {
@@ -36,6 +46,12 @@ export function migrate(db, migrationsDirectory = resolve(root, "migrations")) {
 
 export function transaction(db, operation) {
   db.exec("BEGIN IMMEDIATE");
-  try { const result = operation(); db.exec("COMMIT"); return result; }
-  catch (error) { db.exec("ROLLBACK"); throw error; }
+  try {
+    const result = operation();
+    db.exec("COMMIT");
+    return result;
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
 }
