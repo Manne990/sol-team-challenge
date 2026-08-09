@@ -17,9 +17,10 @@ test("forward migration creates the complete domain schema", () => {
   try {
     const names=fixture.db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(x=>x.name);
     for (const required of ["organizations","sessions","companies","contacts","activities","deals","pipeline_stages","tasks","notifications","saved_views","imports","merge_redirects","audit_events"]) assert(names.includes(required),required);
-    assert.equal(fixture.db.prepare("SELECT count(*) n FROM schema_migrations").get().n,1);
+    assert.equal(fixture.db.prepare("SELECT count(*) n FROM schema_migrations").get().n,2);
+    assert(fixture.db.prepare("PRAGMA table_info(pipeline_stages)").all().some(column=>column.name==="active"));
     migrate(fixture.db);
-    assert.equal(fixture.db.prepare("SELECT count(*) n FROM schema_migrations").get().n,1);
+    assert.equal(fixture.db.prepare("SELECT count(*) n FROM schema_migrations").get().n,2);
   } finally { fixture.close(); }
 });
 test("a failed forward migration rolls back its schema and version record", () => {

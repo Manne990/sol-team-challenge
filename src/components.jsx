@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useId, useRef } from "react";
 
 export function Button({ variant = "primary", className = "", ...props }) {
   return (
@@ -44,22 +44,90 @@ export function DataTable({ caption, columns, rows }) {
   );
 }
 
-export function OperationalState({ type, action }) {
+export function OperationalState({ type, title, message, action }) {
   const copy = {
     loading: ["Loading", "Fetching tasks…"],
     empty: ["No tasks found", "Adjust the filters or add a task."],
     forbidden: ["Access restricted", "Your role cannot access these tasks."],
     error: ["Tasks could not be loaded", "Try again."],
+    "not-found": [
+      "Record not found",
+      "It may have been archived or the link may be incorrect.",
+    ],
+    conflict: [
+      "This record changed",
+      "Review the latest version before saving again.",
+    ],
   }[type] ?? ["Tasks unavailable", "Try again."];
   return (
     <section
       className={`ns-state ns-state-${type}`}
       role={type === "error" ? "alert" : undefined}
     >
-      <h2>{copy[0]}</h2>
-      <p>{copy[1]}</p>
+      <h2>{title ?? copy[0]}</h2>
+      <p>{message ?? copy[1]}</p>
       {action}
     </section>
+  );
+}
+
+export function Dialog({
+  open,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  destructive,
+  onConfirm,
+  onClose,
+  children,
+}) {
+  const panel = useRef(null);
+  const titleId = useId();
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement;
+    panel.current?.focus();
+    const keydown = (event) => {
+      if (event.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", keydown);
+    return () => {
+      document.removeEventListener("keydown", keydown);
+      previous?.focus?.();
+    };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div
+      className="dialog-backdrop"
+      onMouseDown={(event) =>
+        event.target === event.currentTarget && onClose?.()
+      }
+    >
+      <div
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        ref={panel}
+        tabIndex={-1}
+      >
+        <h2 id={titleId}>{title}</h2>
+        {description && <p>{description}</p>}
+        {children}
+        <div className="dialog__actions">
+          <Button variant="quiet" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant={destructive ? "danger" : "primary"}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
