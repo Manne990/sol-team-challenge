@@ -17,6 +17,15 @@ Feature code should depend inward: routes call services/repositories; database
 details do not enter React components. API errors use stable codes, corrective
 messages, and request IDs. Unexpected details are logged server-side only.
 
+## Task time policy
+
+Task due times are accepted and stored as ISO-8601 UTC timestamps. The task UI
+labels due values as UTC, and the server derives overdue, due-today, and
+upcoming views against UTC day boundaries from one request-time clock. Tasks
+without a due time remain open work but never appear in a time-bounded view.
+Completion and reopening set or clear `completed_at`; archiving is independent
+and preserves both the task's relationship history and completion state.
+
 ## Runtime configuration
 
 | Setting     | CLI      | Environment         | Default                 |

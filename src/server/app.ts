@@ -14,6 +14,7 @@ import {
   companyErrorHandler,
   companyRouter,
 } from "./companies.js";
+import { tasksRouter } from "./tasks.js";
 
 export function createApp(database: SqliteDatabase) {
   const app = express();
@@ -23,6 +24,7 @@ export function createApp(database: SqliteDatabase) {
   app.use("/api/auth", authRouter(auth));
   app.use("/api/contacts", contactsRouter(database, auth));
   app.use("/api/companies", companyRouter(new CompanyService(database), auth));
+  app.use("/api/tasks", tasksRouter(database, auth));
 
   app.get("/api/health", (_request, response) => {
     const body: HealthResponse = {

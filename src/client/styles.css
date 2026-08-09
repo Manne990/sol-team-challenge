@@ -819,3 +819,105 @@ a {
     grid-template-columns: 1fr;
   }
 }
+.task-views {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--ns-border);
+}
+.task-views button {
+  border: 0;
+  background: transparent;
+  padding: 0.65rem 0.85rem;
+  white-space: nowrap;
+}
+.task-views button.active {
+  border-bottom: 3px solid var(--ns-accent);
+  font-weight: 700;
+}
+.task-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+.panel {
+  background: white;
+  border: 1px solid var(--ns-border);
+  border-radius: 0.5rem;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 1rem;
+}
+.filters label {
+  display: grid;
+  gap: 0.25rem;
+}
+.checkbox {
+  display: flex !important;
+  align-items: center;
+}
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+.dialog {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+}
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+.contact-form label {
+  display: grid;
+  gap: 0.3rem;
+}
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  width: 100%;
+  min-height: 2.5rem;
+}
+.contact-form__wide {
+  grid-column: 1 / -1;
+}
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.table-link {
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+}
+@media (max-width: 640px) {
+  .contact-form {
+    grid-template-columns: 1fr;
+  }
+  .contact-form__wide {
+    grid-column: auto;
+  }
+}
