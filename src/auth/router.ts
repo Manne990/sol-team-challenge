@@ -14,6 +14,7 @@ import {
 } from "./http.js";
 import { AuthError, AuthService } from "./service.js";
 import { SqliteAuthRepository } from "./sqlite-repository.js";
+import type { Principal } from "./types.js";
 
 const EIGHT_HOURS_SECONDS = 8 * 60 * 60;
 
@@ -37,6 +38,24 @@ export function createAuthRouter(
 ) {
   const router = Router();
   const service = new AuthService(new SqliteAuthRepository(database));
+  const sessionBody = (principal: Principal) => {
+    const context = database
+      .prepare(
+        "SELECT u.email,u.display_name,o.name organization_name FROM users u JOIN organizations o ON o.id=? WHERE u.id=?",
+      )
+      .get(principal.organizationId, principal.userId) as
+      Record<string, unknown> | undefined;
+    return {
+      authenticated: true,
+      userId: principal.userId,
+      organizationId: principal.organizationId,
+      organizationName: String(context?.organization_name ?? "Organization"),
+      userName: String(context?.display_name ?? "User"),
+      userEmail: String(context?.email ?? ""),
+      role: principal.role,
+      expiresAt: principal.expiresAt,
+    };
+  };
   const audit = (
     organizationId: string,
     actorId: string,
@@ -106,13 +125,7 @@ export function createAuthRouter(
         "set-cookie",
         sessionCookie(signedIn.token, EIGHT_HOURS_SECONDS, secureCookies),
       );
-      response.status(201).json({
-        authenticated: true,
-        userId: signedIn.principal.userId,
-        organizationId: signedIn.principal.organizationId,
-        role: signedIn.principal.role,
-        expiresAt: signedIn.principal.expiresAt,
-      });
+      response.status(201).json(sessionBody(signedIn.principal));
     } catch (error) {
       if (error instanceof AuthError) errorResponse(error, response);
       else throw error;
@@ -127,13 +140,7 @@ export function createAuthRouter(
         return;
       }
       const principal = await service.authenticate(token);
-      response.json({
-        authenticated: true,
-        userId: principal.userId,
-        organizationId: principal.organizationId,
-        role: principal.role,
-        expiresAt: principal.expiresAt,
-      });
+      response.json(sessionBody(principal));
     } catch (error) {
       if (error instanceof AuthError) errorResponse(error, response);
       else throw error;

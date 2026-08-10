@@ -57,6 +57,8 @@ export function DealsPage({
   });
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [dialog, setDialog] = useState(false);
+  const [selected, setSelected] = useState<Deal | null>(null);
+  const [editing, setEditing] = useState(false);
   const [toast, setToast] = useState("");
   const load = useCallback(async () => {
     setState("loading");
@@ -119,6 +121,73 @@ export function DealsPage({
           .message,
       );
   }
+  async function transition(deal: Deal, nextStatus: "open" | "won" | "lost") {
+    const lossReason =
+      nextStatus === "lost"
+        ? window.prompt(
+            "Why was this deal lost? This reason is retained in history.",
+          )
+        : null;
+    if (nextStatus === "lost" && !lossReason?.trim()) return;
+    const response = await fetch(`/api/deals/${deal.id}/transition`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        stageId: deal.stage.id,
+        status: nextStatus,
+        lossReason,
+        version: deal.version,
+      }),
+    });
+    const body = (await response.json()) as Deal & {
+      error?: { message: string };
+    };
+    if (!response.ok) {
+      setToast(body.error?.message ?? "Could not update the deal outcome.");
+      return;
+    }
+    setSelected(body);
+    setToast(
+      nextStatus === "open"
+        ? "Deal reopened"
+        : nextStatus === "won"
+          ? "Deal won"
+          : "Deal lost",
+    );
+    await load();
+  }
+  async function update(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selected) return;
+    const form = new FormData(event.currentTarget);
+    const response = await fetch(`/api/deals/${selected.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: form.get("name"),
+        companyId: selected.company.id,
+        ownerId: selected.owner.id,
+        stageId: selected.stage.id,
+        amountMinor: Math.round(Number(form.get("amount")) * 100),
+        currency: form.get("currency"),
+        probability: Number(form.get("probability")),
+        expectedCloseDate: form.get("expectedCloseDate"),
+        contactIds: [],
+        version: selected.version,
+      }),
+    });
+    const body = (await response.json()) as Deal & {
+      error?: { message: string };
+    };
+    if (!response.ok) {
+      setToast(body.error?.message ?? "Could not update the deal.");
+      return;
+    }
+    setSelected(body);
+    setEditing(false);
+    setToast("Deal updated");
+    await load();
+  }
   return (
     <>
       <PageHeader
@@ -168,7 +237,7 @@ export function DealsPage({
       ) : data.items.length === 0 ? (
         <OperationalState kind="empty" title="No deals found" />
       ) : view === "list" ? (
-        <DealTable deals={data.items} />
+        <DealTable deals={data.items} onOpen={setSelected} />
       ) : (
         <section className="ns-pipeline" aria-label="Sales pipeline">
           {data.stages.map((stage) => (
@@ -183,6 +252,9 @@ export function DealsPage({
                   <p>{deal.company.name}</p>
                   <strong>{money(deal)}</strong>
                   <p>{deal.probability}% probability</p>
+                  <Button variant="quiet" onClick={() => setSelected(deal)}>
+                    View deal
+                  </Button>
                   {role !== "viewer" && (
                     <label className="ns-field">
                       <span>Move without dragging</span>
@@ -266,6 +338,110 @@ export function DealsPage({
           <Button type="submit">Create deal</Button>
         </form>
       </Dialog>
+      <Dialog
+        open={Boolean(selected) && !editing}
+        title={selected?.name ?? "Deal detail"}
+        description="Deal value, stage, outcome, and loss reason."
+        onClose={() => setSelected(null)}
+      >
+        {selected && (
+          <div>
+            <dl>
+              <dt>Company</dt>
+              <dd>{selected.company.name}</dd>
+              <dt>Owner</dt>
+              <dd>{selected.owner.name}</dd>
+              <dt>Stage</dt>
+              <dd>{selected.stage.name}</dd>
+              <dt>Value</dt>
+              <dd>{money(selected)}</dd>
+              <dt>Status</dt>
+              <dd>{selected.status}</dd>
+              <dt>Loss reason</dt>
+              <dd>{selected.lossReason ?? "—"}</dd>
+            </dl>
+            {role !== "viewer" && (
+              <div className="ns-dialog-actions">
+                <Button variant="secondary" onClick={() => setEditing(true)}>
+                  Edit deal
+                </Button>
+                {selected.status === "open" ? (
+                  <>
+                    <Button onClick={() => void transition(selected, "won")}>
+                      Mark won
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={() => void transition(selected, "lost")}
+                    >
+                      Mark lost
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => void transition(selected, "open")}>
+                    Reopen deal
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </Dialog>
+      <Dialog
+        open={Boolean(selected) && editing}
+        title="Edit deal"
+        description="Concurrent changes are detected before saving."
+        onClose={() => setEditing(false)}
+      >
+        {selected && (
+          <form onSubmit={update}>
+            <Field label="Deal name" required>
+              <TextInput
+                name="name"
+                defaultValue={selected.name}
+                required
+                autoFocus
+              />
+            </Field>
+            <Field label="Amount" required>
+              <TextInput
+                name="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={selected.amountMinor / 100}
+                required
+              />
+            </Field>
+            <Field label="Currency" required>
+              <TextInput
+                name="currency"
+                defaultValue={selected.currency}
+                pattern="[A-Za-z]{3}"
+                required
+              />
+            </Field>
+            <Field label="Probability" required>
+              <TextInput
+                name="probability"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue={selected.probability}
+                required
+              />
+            </Field>
+            <Field label="Expected close date">
+              <TextInput
+                name="expectedCloseDate"
+                type="date"
+                defaultValue={selected.expectedCloseDate ?? ""}
+              />
+            </Field>
+            <Button type="submit">Save deal</Button>
+          </form>
+        )}
+      </Dialog>
       <ToastRegion>
         {toast && <Toast title={toast} onDismiss={() => setToast("")} />}
       </ToastRegion>
@@ -278,11 +454,25 @@ function money(deal: Deal) {
     currency: deal.currency,
   }).format(deal.amountMinor / 100);
 }
-function DealTable({ deals }: { deals: Deal[] }) {
+function DealTable({
+  deals,
+  onOpen,
+}: {
+  deals: Deal[];
+  onOpen: (deal: Deal) => void;
+}) {
   return (
     <DataTable
       caption="Deals"
-      columns={["Deal", "Company", "Stage", "Value", "Probability", "Status"]}
+      columns={[
+        "Deal",
+        "Company",
+        "Stage",
+        "Value",
+        "Probability",
+        "Status",
+        "Action",
+      ]}
     >
       {deals.map((deal) => (
         <tr key={deal.id}>
@@ -305,6 +495,11 @@ function DealTable({ deals }: { deals: Deal[] }) {
             >
               {deal.status}
             </StatusBadge>
+          </td>
+          <td>
+            <Button variant="quiet" onClick={() => onOpen(deal)}>
+              View deal
+            </Button>
           </td>
         </tr>
       ))}

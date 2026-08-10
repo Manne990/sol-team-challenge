@@ -193,6 +193,35 @@ export function ActivitiesPage({
       );
     }
   }
+  async function remove(activity: Activity) {
+    if (
+      !window.confirm(
+        `Delete ${activity.subject}? This removes the timeline entry but keeps its audit record.`,
+      )
+    )
+      return;
+    try {
+      const response = await fetch(
+        `/api/activities/${activity.id}?version=${activity.version}`,
+        { method: "DELETE", credentials: "same-origin" },
+      );
+      if (!response.ok) {
+        const body = (await response.json()) as {
+          error?: { message?: string };
+        };
+        throw new Error(body.error?.message ?? "Could not delete activity.");
+      }
+      setDetail(null);
+      setNotice("Activity deleted.");
+      await load();
+    } catch (failure) {
+      setError(
+        failure instanceof Error
+          ? failure.message
+          : "Could not delete activity.",
+      );
+    }
+  }
   const canEdit = role !== "viewer";
   return (
     <>
@@ -372,6 +401,9 @@ export function ActivitiesPage({
               <div className="ns-dialog-actions">
                 <Button variant="secondary" onClick={() => edit(detail)}>
                   Correct narrative
+                </Button>
+                <Button variant="danger" onClick={() => void remove(detail)}>
+                  Delete activity
                 </Button>
               </div>
             )}

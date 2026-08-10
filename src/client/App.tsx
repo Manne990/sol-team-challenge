@@ -17,6 +17,9 @@ type Session = {
   authenticated: true;
   userId: string;
   organizationId: string;
+  organizationName: string;
+  userName: string;
+  userEmail: string;
   role: "owner" | "member" | "viewer";
   expiresAt: string;
 };
@@ -78,8 +81,9 @@ export function App() {
       <AppShell
         currentPath="/contacts"
         role={session.role}
-        organizationName="Northstar Demo"
-        userName="Northstar user"
+        organizationName={session.organizationName}
+        userName={session.userName}
+        userEmail={session.userEmail}
         onSignOut={() => void logoutSession(setSession)}
       >
         <ContactsPage role={session.role} />
@@ -90,8 +94,9 @@ export function App() {
       <AppShell
         currentPath="/imports"
         role={session.role}
-        organizationName="Northstar Demo"
-        userName="Northstar user"
+        organizationName={session.organizationName}
+        userName={session.userName}
+        userEmail={session.userEmail}
         onSignOut={() => void logoutSession(setSession)}
       >
         <ImportsPage role={session.role} />
@@ -102,8 +107,9 @@ export function App() {
       <AppShell
         currentPath="/activities"
         role={session.role}
-        organizationName="Northstar Demo"
-        userName="Northstar user"
+        organizationName={session.organizationName}
+        userName={session.userName}
+        userEmail={session.userEmail}
         onSignOut={() => void logoutSession(setSession)}
       >
         <ActivitiesPage role={session.role} userId={session.userId} />
@@ -113,6 +119,9 @@ export function App() {
     <WorkspacePreview
       role={session.role}
       userId={session.userId}
+      organizationName={session.organizationName}
+      userName={session.userName}
+      userEmail={session.userEmail}
       onSignOut={() => void logoutSession(setSession)}
     />
   );
