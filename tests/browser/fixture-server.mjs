@@ -66,6 +66,24 @@ const tasks = [
   },
 ];
 const savedViews = [];
+const members = [
+  {
+    id: "usr_northstar_owner",
+    email: "owner@northstar.test",
+    name: "Morgan Lee",
+    role: "owner",
+    revokedAt: null,
+    self: true,
+  },
+  {
+    id: "usr_northstar_member",
+    email: "member@northstar.test",
+    name: "Jamie Chen",
+    role: "member",
+    revokedAt: null,
+    self: false,
+  },
+];
 const fixtureDeals = [
   {
     id: "deal_fixture",
@@ -248,6 +266,67 @@ const server = createServer((request, response) => {
             warnings: [],
           },
         ],
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/admin/organization" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        organization: {
+          id: "org_northstar_demo",
+          name: "Northstar Demo",
+          slug: "northstar-demo",
+          settings: { timezone: "Europe/Stockholm" },
+          version: 1,
+        },
+        members,
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/admin/members" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body),
+        member = {
+          id: `member-${members.length}`,
+          email: input.email,
+          name: input.name,
+          role: input.role,
+          revokedAt: null,
+          self: false,
+        };
+      members.push(member);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify(member));
+    });
+    return;
+  }
+  if (pathname === "/api/admin/audit" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        items: [
+          {
+            id: "event-1",
+            actorName: "Morgan Lee",
+            action: "membership.created",
+            entityType: "membership",
+            entityId: "usr_northstar_member",
+            correlationId: "request-1",
+            summary: { role: "member" },
+            occurredAt: "2026-08-10T10:00:00Z",
+          },
+        ],
+        page: 1,
+        pageSize: 25,
+        total: 1,
+        totalPages: 1,
       }),
     );
     return;
