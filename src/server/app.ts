@@ -8,6 +8,7 @@ import { createCompaniesRouter } from "../companies/router.js";
 import { createDealsRouter } from "../deals/router.js";
 import { createDuplicatesRouter } from "../duplicates/router.js";
 import { createImportsRouter } from "../imports/router.js";
+import { createDashboardRouter } from "../dashboard/router.js";
 import type { ApiError, HealthResponse } from "../shared/api.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { createTasksRouter } from "../tasks/router.js";
@@ -44,6 +45,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/activities", createActivitiesRouter(database, secureCookies));
     app.use("/api/notifications", notificationsRouter(database, secureCookies));
     app.use("/api/admin", createAdminRouter(database, secureCookies));
+    app.use("/api/dashboard", createDashboardRouter(database));
   }
   app.use("/api", (_request, response) => {
     const body: ApiError = {

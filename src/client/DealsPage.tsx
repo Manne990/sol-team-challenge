@@ -48,6 +48,8 @@ export function DealsPage({
   const initial = new URLSearchParams(location.search);
   const [status, setStatus] = useState(initial.get("status") ?? "open");
   const [view, setView] = useState(initial.get("view") ?? "pipeline");
+  const closeFrom = initial.get("closeFrom") ?? "";
+  const closeTo = initial.get("closeTo") ?? "";
   const [data, setData] = useState<Payload>({
     items: [],
     stages: [],
@@ -59,6 +61,8 @@ export function DealsPage({
   const load = useCallback(async () => {
     setState("loading");
     const params = new URLSearchParams({ status, view });
+    if (closeFrom) params.set("closeFrom", closeFrom);
+    if (closeTo) params.set("closeTo", closeTo);
     history.replaceState(null, "", `/deals?${params}`);
     try {
       const response = await fetch(`/api/deals?${params}`);
@@ -68,7 +72,7 @@ export function DealsPage({
     } catch {
       setState("error");
     }
-  }, [status, view]);
+  }, [status, view, closeFrom, closeTo]);
   useEffect(() => {
     void load();
   }, [load]);

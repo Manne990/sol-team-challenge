@@ -350,6 +350,20 @@ export function createDealsRouter(
         const q = `%${request.query.q.trim().replace(/[\\%_]/gu, "\\$&")}%`;
         values.push(q, q);
       }
+      if (
+        typeof request.query.closeFrom === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/u.test(request.query.closeFrom)
+      ) {
+        where.push("d.expected_close_date>=?");
+        values.push(request.query.closeFrom);
+      }
+      if (
+        typeof request.query.closeTo === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/u.test(request.query.closeTo)
+      ) {
+        where.push("d.expected_close_date<=?");
+        values.push(request.query.closeTo);
+      }
       const clause = where.join(" AND ");
       const total = Number(
         (

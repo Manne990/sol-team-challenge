@@ -130,6 +130,71 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (pathname === "/api/dashboard") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        asOf: "2026-08-10T09:00:00.000Z",
+        semantics: { pipeline: "Open, non-archived deals grouped by currency" },
+        pipeline: {
+          values: [{ currency: "SEK", amountMinor: 2500000, count: 1 }],
+          link: "/deals?status=open",
+          stages: [
+            {
+              id: "stage_lead",
+              name: "Qualification",
+              position: 0,
+              color: "#2563eb",
+              count: 1,
+              values: [{ currency: "SEK", amountMinor: 2500000, count: 1 }],
+            },
+          ],
+        },
+        wonLostTrend: { items: [], link: "/deals?status=won" },
+        recentActivities: {
+          items: [
+            {
+              id: "activity_fixture",
+              type: "call",
+              subject: "Discovery call",
+              occurredAt: "2026-08-09T09:00:00.000Z",
+              creatorName: "Morgan Lee",
+            },
+          ],
+          link: "/activities",
+        },
+        tasks: {
+          overdue: 1,
+          upcoming: 2,
+          overdueLink: "/tasks?view=overdue",
+          upcomingLink: "/tasks?view=upcoming",
+        },
+        closingSoon: {
+          items: [
+            {
+              id: "deal_fixture",
+              name: "Acme expansion",
+              expectedCloseDate: "2026-08-20",
+              amountMinor: 2500000,
+              currency: "SEK",
+            },
+          ],
+          link: "/deals?status=open&closeTo=2026-09-09",
+        },
+        staleAccounts: {
+          items: [
+            {
+              id: "fixture-company",
+              name: "Acme Nordic AB",
+              lastActivityAt: null,
+            },
+          ],
+          link: "/companies?lifecycle=customer&staleBefore=2026-07-11",
+        },
+      }),
+    );
+    return;
+  }
   if (pathname === "/api/auth/session" && request.method === "GET") {
     const authenticated =
       request.headers.cookie?.includes("northstar_session=fixture") ?? false;
