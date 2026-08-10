@@ -181,3 +181,58 @@ test("search and originating links open records while relationships and combined
     direction: "asc",
   });
 });
+
+test("dashboard filters, deal pagination, filtered exports, and company ownership remain operable", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/deals?status=open&stageId=stage_northstar_0&view=list");
+  await expect(
+    page
+      .locator("label")
+      .filter({ hasText: /^Stage/u })
+      .locator("select"),
+  ).toHaveValue("stage_northstar_0");
+  const stageTotal = await page.evaluate(async () =>
+    Number(
+      (
+        (await (
+          await fetch("/api/deals?status=open&stageId=stage_northstar_0")
+        ).json()) as { total: number }
+      ).total,
+    ),
+  );
+  await expect(
+    page.getByText(`${stageTotal} deals`, { exact: true }),
+  ).toBeVisible();
+  await page.goto("/deals?status=open&view=list");
+  await expect(page.getByLabel("Pagination")).toContainText("Page 1 of 2");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByLabel("Pagination")).toContainText("Page 2 of 2");
+
+  await page.goto("/companies?staleBefore=2026-07-11");
+  await expect(page.getByLabel("Stale before")).toHaveValue("2026-07-11");
+  const staleTotal = await page.evaluate(async () =>
+    Number(
+      (
+        (await (
+          await fetch("/api/companies?staleBefore=2026-07-11")
+        ).json()) as { total: number }
+      ).total,
+    ),
+  );
+  await expect(
+    page.getByText(`${staleTotal} records`, { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Export filtered CSV" }),
+  ).toHaveAttribute("href", /staleBefore=2026-07-11/u);
+  await page.getByRole("button", { name: "Add company" }).click();
+  await expect(page.getByLabel("Owner user ID")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+
+  await page.goto("/contacts?status=active&tag=priority");
+  await expect(
+    page.getByRole("link", { name: "Export filtered CSV" }),
+  ).toHaveAttribute("href", /status=active.*tag=priority/u);
+});

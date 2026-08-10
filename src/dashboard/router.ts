@@ -159,7 +159,7 @@ export function createDashboardRouter(
               ? String(row.last_activity_at)
               : null,
           })),
-          link: `/companies?lifecycle=customer&staleBefore=${staleSince}`,
+          link: `/companies?staleBefore=${staleSince}`,
         },
       });
     } catch (error) {

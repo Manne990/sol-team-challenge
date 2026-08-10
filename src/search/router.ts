@@ -30,10 +30,12 @@ const resources = new Set(["companies", "contacts", "deals", "tasks"]),
     "company",
     "status",
     "stage",
+    "stageId",
     "assignee",
     "view",
     "contact",
     "deal",
+    "staleBefore",
   ]);
 function send(error: unknown, response: Response) {
   if (error instanceof SearchError)

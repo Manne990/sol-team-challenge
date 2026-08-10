@@ -519,6 +519,17 @@ function exportRows(
     );
     values.push(query.tag);
   }
+  if (
+    kind === "companies" &&
+    /^\d{4}-\d{2}-\d{2}$/u.test(query.staleBefore ?? "")
+  ) {
+    if (!query.lifecycle)
+      where.push("lifecycle_status IN ('prospect','customer')");
+    where.push(
+      "NOT EXISTS (SELECT 1 FROM activities a WHERE a.organization_id=companies.organization_id AND a.company_id=companies.id AND a.occurred_at>=?)",
+    );
+    values.push(`${query.staleBefore}T00:00:00.000Z`);
+  }
   if (kind === "companies") {
     const columns = [
       "id",

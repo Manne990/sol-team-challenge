@@ -231,6 +231,12 @@ export function ContactsPage({ role }: { role: Role }) {
                 direction: filters.direction,
               }}
             />
+            <a
+              className="ns-button ns-button-secondary"
+              href={`/api/imports/exports/contacts.csv?${new URLSearchParams({ q: filters.q, status: filters.status, tag: filters.tag })}`}
+            >
+              Export filtered CSV
+            </a>
             {canEdit && <Button onClick={() => openForm()}>Add contact</Button>}
           </>
         }

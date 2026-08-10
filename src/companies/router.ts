@@ -206,6 +206,17 @@ export function createCompaniesRouter(
         const q = `%${request.query.q.trim().replace(/[\\%_]/g, "\\$&")}%`;
         values.push(q, q, q);
       }
+      if (
+        typeof request.query.staleBefore === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/u.test(request.query.staleBefore)
+      ) {
+        if (!request.query.lifecycle)
+          where.push("c.lifecycle_status IN ('prospect','customer')");
+        where.push(
+          "NOT EXISTS (SELECT 1 FROM activities a WHERE a.organization_id=c.organization_id AND a.company_id=c.id AND a.occurred_at>=?)",
+        );
+        values.push(`${request.query.staleBefore}T00:00:00.000Z`);
+      }
       const clause = where.join(" AND ");
       const total = Number(
         (
