@@ -7,14 +7,21 @@ import { DealsPage } from "../DealsPage";
 import { NotificationsPage } from "../NotificationsPage";
 import { AdminPage } from "./AdminPage";
 import { DashboardPage } from "../DashboardPage";
+import { DuplicatesPage } from "./DuplicatesPage";
 
 export function WorkspacePreview({
   role = "owner",
   userId = "usr_northstar_owner",
+  organizationName = "Northstar Demo",
+  userName = "Morgan Lee",
+  userEmail = "owner@northstar.test",
   onSignOut,
 }: {
   role?: UserRole;
   userId?: string;
+  organizationName?: string;
+  userName?: string;
+  userEmail?: string;
   onSignOut?: () => void;
 }) {
   const [path, setPath] = useState(
@@ -29,9 +36,9 @@ export function WorkspacePreview({
       currentPath={path}
       navigate={navigate}
       role={role}
-      organizationName="Northstar Demo"
-      userName="Morgan Lee"
-      userEmail="owner@northstar.test"
+      organizationName={organizationName}
+      userName={userName}
+      userEmail={userEmail}
       onSignOut={onSignOut}
     >
       {path.startsWith("/companies") ? (
@@ -44,6 +51,8 @@ export function WorkspacePreview({
         <DealsPage role={role} userId={userId} />
       ) : path.startsWith("/notifications") ? (
         <NotificationsPage />
+      ) : path.startsWith("/duplicates") ? (
+        <DuplicatesPage role={role} />
       ) : path.startsWith("/admin") ? (
         <AdminPage />
       ) : path.startsWith("/audit") ? (

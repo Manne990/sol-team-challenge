@@ -4,4 +4,12 @@ Run `npm run ci` from the repository root to reproduce the required static, unit
 
 Tests must import `productFixtures()` for frozen clocks, opaque identifiers, two organizations, every role, pagination volume, duplicate names, historical activity, pipeline stages, and overdue/upcoming work. Each integration test creates its own database with `createIsolatedDatabase()`; never use `data/` or a developer database. Negative tenant tests must assert the generic response and call `expectPersistedStateUnchanged` to prove foreign bytes did not change.
 
-Browser fixtures bind to port `0`, allowing the operating system to allocate a unique port, and close servers in teardown. Playwright owns browser cleanup and retains a trace on failure. CI rejects focused, skipped, pending, or empty test suites before running tests.
+The default Playwright suite resets and seeds a checkout-specific temporary
+SQLite database, launches the real Express/Vite application on a
+checkout-derived port, and drives persisted browser journeys through the same
+HTTP routes used in production. It covers deal outcome lifecycle, activity
+deletion, explicit duplicate merge, and outside-organization identity. The
+older `tests/browser/fixture-server.mjs` harness remains useful for isolated UI
+development but is not the CI browser target. Playwright owns process and
+browser cleanup and retains a trace on failure. CI rejects focused, skipped,
+pending, or empty test suites before running tests.

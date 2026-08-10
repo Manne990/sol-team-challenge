@@ -43,6 +43,9 @@ const icons: Record<string, ReactNode> = {
     <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6v-5a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z" />
   ),
   imports: <path d="M19 9h-4V3H9v6H5l7 7 7-7ZM5 18v2h14v-2H5Z" />,
+  duplicates: (
+    <path d="M7 7h10v10H7V7Zm-4 4h2V5h6V3H3v8Zm16 2v6h-6v2h8v-8h-2Z" />
+  ),
   audit: (
     <path d="M12 2 4 5v6c0 5.05 3.41 9.74 8 11 4.59-1.26 8-5.95 8-11V5l-8-3Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 12.9a8.9 8.9 0 0 1-5-3.54c.05-1.66 3.34-2.58 5-2.58 1.65 0 4.95.92 5 2.58a8.92 8.92 0 0 1-5 3.54Z" />
   ),
@@ -60,6 +63,7 @@ const defaultNavigation: NavigationItem[] = [
   { href: "/tasks", label: "Tasks", icon: icons.tasks },
   { href: "/notifications", label: "Notifications", icon: icons.notifications },
   { href: "/imports", label: "Imports", icon: icons.imports },
+  { href: "/duplicates", label: "Duplicates", icon: icons.duplicates },
   { href: "/audit", label: "Audit", icon: icons.audit, ownerOnly: true },
   {
     href: "/admin",

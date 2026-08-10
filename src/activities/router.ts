@@ -476,5 +476,62 @@ export function createActivitiesRouter(
       send(error, response);
     }
   });
+  router.delete("/:id", async (request, response) => {
+    try {
+      const user = await mutation(request),
+        existing = find(user.organizationId, request.params.id);
+      if (!existing)
+        throw new ActivityError(
+          404,
+          "NOT_FOUND",
+          "The requested activity was not found.",
+        );
+      if (user.role !== "owner" && String(existing.creator_id) !== user.userId)
+        throw new AuthError(
+          "forbidden",
+          "Only the creator or an owner can delete this activity.",
+        );
+      const version = Number(request.query.version);
+      if (!Number.isInteger(version))
+        throw new ActivityError(
+          400,
+          "VALIDATION",
+          "The current activity version is required.",
+        );
+      const now = new Date().toISOString();
+      database.exec("BEGIN IMMEDIATE");
+      try {
+        const result = database
+          .prepare(
+            "DELETE FROM activities WHERE organization_id=? AND id=? AND version=?",
+          )
+          .run(user.organizationId, request.params.id, version);
+        if (result.changes !== 1)
+          throw new ActivityError(
+            409,
+            "CONFLICT",
+            "This activity changed. Reload it before deleting.",
+          );
+        audit.run(
+          randomUUID(),
+          user.organizationId,
+          user.userId,
+          "activity.deleted",
+          "activity",
+          request.params.id,
+          String(response.locals.requestId),
+          JSON.stringify({ subject: String(existing.subject) }),
+          now,
+        );
+        database.exec("COMMIT");
+      } catch (error) {
+        database.exec("ROLLBACK");
+        throw error;
+      }
+      response.status(204).end();
+    } catch (error) {
+      send(error, response);
+    }
+  });
   return router;
 }

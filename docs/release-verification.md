@@ -33,9 +33,12 @@ policy, database tests, authentication tests, the complete Vitest inventory,
 the Chromium inventory, and a production build. `npm run test:policy` rejects
 focused, skipped, todo, fixme, or empty inventories; Playwright also sets
 `forbidOnly` and runs browser files fully in parallel to expose order coupling.
-Database and integration helpers allocate isolated temporary databases, while
-browser orchestration derives a checkout-specific port and refuses to reuse a
-running server.
+Database and integration helpers allocate isolated temporary databases. The
+default browser orchestration resets and seeds another checkout-specific SQLite
+database, launches the real application on a derived port, and refuses to reuse
+a running server. Its release journeys verify persisted deal outcomes,
+activity deletion, explicit duplicate merge, and authenticated outside-workspace
+identity. The canned fixture server is not used by `npm run test:browser`.
 
 ## Route and authorization review
 
