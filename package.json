@@ -23,10 +23,12 @@
     "test:unit": "vitest run",
     "test:browser": "playwright test",
     "build": "vite build && tsc -p tsconfig.server.json",
-    "ci": "npm run format && npm run lint && npm run typecheck && npm run test:policy && npm run db:test && npm run test:unit && npm run test:browser && npm run build"
+    "ci": "npm run format && npm run lint && npm run typecheck && npm run test:policy && npm run db:test && npm run test:unit && npm run test:browser && npm run build",
+    "test:auth": "tsx --test test/auth.test.ts test/auth-sqlite.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.2.0",
+    "bcryptjs": "^3.0.3",
     "express": "^5.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
