@@ -7,9 +7,10 @@
     "node": ">=22"
   },
   "scripts": {
-    "db:reset": "node scripts/baseline.mjs db-reset",
-    "db:seed": "node scripts/baseline.mjs db-seed",
-    "ci": "node scripts/baseline.mjs ci",
+    "db:reset": "node scripts/db.mjs reset",
+    "db:seed": "node scripts/db.mjs seed",
+    "db:test": "node --test tests/database.test.mjs",
+    "ci": "node scripts/baseline.mjs ci && npm run db:test",
     "build": "node scripts/baseline.mjs build",
     "dev": "node scripts/baseline.mjs dev"
   }
