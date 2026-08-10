@@ -9,6 +9,7 @@ export default defineConfig({
       "test/tasks-http.test.ts",
       "test/search-http.test.ts",
       "test/deals-http.test.ts",
+      "test/imports-http.test.ts",
     ],
     environment: "node",
     passWithNoTests: false,

@@ -5,6 +5,7 @@ import { createAuthRouter } from "../auth/router.js";
 import { AuthError } from "../auth/service.js";
 import { createCompaniesRouter } from "../companies/router.js";
 import { createDealsRouter } from "../deals/router.js";
+import { createImportsRouter } from "../imports/router.js";
 import type { ApiError, HealthResponse } from "../shared/api.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { createTasksRouter } from "../tasks/router.js";
@@ -34,6 +35,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/tasks", createTasksRouter(database, secureCookies));
     app.use("/api/search", createSearchRouter(database, secureCookies));
     app.use("/api/deals", createDealsRouter(database, secureCookies));
+    app.use("/api/imports", createImportsRouter(database, secureCookies));
   }
   app.use("/api", (_request, response) => {
     const body: ApiError = {

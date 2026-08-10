@@ -161,6 +161,93 @@ const server = createServer((request, response) => {
     response.end();
     return;
   }
+  if (pathname === "/api/imports/preview" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const payload = JSON.parse(body);
+      const invalid = payload.csv.includes("\n,INVALID");
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(
+        JSON.stringify({
+          id: "fixture-import",
+          kind: payload.kind,
+          status: "preview",
+          rowCount: invalid ? 2 : 1,
+          validCount: 1,
+          errorCount: invalid ? 1 : 0,
+          committedAt: null,
+          rows: [
+            {
+              row: 2,
+              values: {
+                name: "Browser Company",
+                organizationNumber: "BROWSER-1",
+              },
+              errors: [],
+              warnings: [],
+            },
+            ...(invalid
+              ? [
+                  {
+                    row: 3,
+                    values: { name: "", organizationNumber: "INVALID" },
+                    errors: ["Company name is required."],
+                    warnings: [],
+                  },
+                ]
+              : []),
+          ],
+        }),
+      );
+    });
+    return;
+  }
+  if (
+    pathname === "/api/imports/fixture-import/commit" &&
+    request.method === "POST"
+  ) {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        id: "fixture-import",
+        kind: "companies",
+        status: "committed",
+        rowCount: 2,
+        validCount: 1,
+        errorCount: 1,
+        committedAt: new Date().toISOString(),
+        rows: [
+          {
+            row: 2,
+            values: { name: "Browser Company" },
+            errors: [],
+            warnings: [],
+          },
+          {
+            row: 3,
+            values: { name: "" },
+            errors: ["Company name is required."],
+            warnings: [],
+          },
+        ],
+      }),
+    );
+    return;
+  }
+  if (
+    pathname.startsWith("/api/imports/exports/") &&
+    request.method === "GET"
+  ) {
+    response.writeHead(200, {
+      "content-type": "text/csv",
+      "content-disposition": "attachment; filename=export.csv",
+    });
+    response.end("id,name\r\nfixture,Browser Company\r\n");
+    return;
+  }
   if (pathname === "/api/companies" && request.method === "GET") {
     response.writeHead(200, { "content-type": "application/json" });
     response.end(
@@ -434,13 +521,15 @@ const server = createServer((request, response) => {
     pathname === "/contacts" ||
     pathname === "/tasks" ||
     pathname === "/deals" ||
+    pathname === "/imports" ||
     pathname.startsWith("/assets/")
   ) {
     const relative =
       pathname === "/workspace" ||
       pathname === "/contacts" ||
       pathname === "/tasks" ||
-      pathname === "/deals"
+      pathname === "/deals" ||
+      pathname === "/imports"
         ? "index.html"
         : normalize(pathname).replace(/^\/+/, "");
     try {
