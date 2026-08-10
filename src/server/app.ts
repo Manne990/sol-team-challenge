@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import express, { type ErrorRequestHandler } from "express";
 import { createAuthRouter } from "../auth/router.js";
+import { createCompaniesRouter } from "../companies/router.js";
 import type { ApiError, HealthResponse } from "../shared/api.js";
 
 export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
@@ -21,7 +22,10 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     };
     response.json(body);
   });
-  if (database) app.use("/api/auth", createAuthRouter(database, secureCookies));
+  if (database) {
+    app.use("/api/auth", createAuthRouter(database, secureCookies));
+    app.use("/api/companies", createCompaniesRouter(database, secureCookies));
+  }
   app.use("/api", (_request, response) => {
     const body: ApiError = {
       error: {

@@ -26,6 +26,28 @@ const contentTypes = {
   ".js": "text/javascript; charset=utf-8",
   ".html": "text/html; charset=utf-8",
 };
+const companies = [
+  {
+    id: "fixture-company",
+    name: "Acme Nordic AB",
+    organizationNumber: "SE-559001-1200",
+    externalReference: null,
+    website: null,
+    phone: null,
+    industry: "Manufacturing",
+    size: "medium",
+    address: null,
+    lifecycleStatus: "customer",
+    ownerId: "usr_northstar_owner",
+    ownerName: "Morgan Lee",
+    tags: ["priority"],
+    description: "",
+    archivedAt: null,
+    createdAt: "2026-08-09T13:15:00Z",
+    updatedAt: "2026-08-09T13:15:00Z",
+    version: 1,
+  },
+];
 
 const server = createServer((request, response) => {
   const pathname = new URL(request.url ?? "/", `http://${host}:${port}`)
@@ -103,6 +125,41 @@ const server = createServer((request, response) => {
         "northstar_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
     });
     response.end();
+    return;
+  }
+  if (pathname === "/api/companies" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        items: companies,
+        page: 1,
+        pageSize: 20,
+        total: companies.length,
+        totalPages: 1,
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/companies" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body);
+      const company = {
+        ...companies[0],
+        id: `fixture-${companies.length}`,
+        name: input.name,
+        organizationNumber: input.organizationNumber || null,
+        industry: input.industry || null,
+        lifecycleStatus: input.lifecycleStatus,
+        updatedAt: new Date().toISOString(),
+      };
+      companies.push(company);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify(company));
+    });
     return;
   }
   if (pathname === "/workspace" || pathname.startsWith("/assets/")) {
