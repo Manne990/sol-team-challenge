@@ -74,7 +74,7 @@ test("confirmation explains consequences and only confirms explicitly", () => {
   expect(screen.getByRole("dialog").getAttribute("aria-modal")).toBe("true");
   expect(screen.getByText(/Contacts and history remain/)).toBeTruthy();
   fireEvent.click(
-    screen.getAllByRole("button", { name: "Archive company" })[1],
+    screen.getAllByRole("button", { name: "Archive company" })[1]!,
   );
   expect(confirm).toHaveBeenCalledOnce();
 });

@@ -274,7 +274,7 @@ export function Dialog({
         ),
       ];
       if (!items.length) return;
-      const first = items[0];
+      const first = items[0]!;
       const last = items.at(-1)!;
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();

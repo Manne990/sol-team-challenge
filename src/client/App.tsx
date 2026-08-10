@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import type { HealthResponse } from "../shared/api";
+import { OperationalState, WorkspacePreview } from "./components";
 
 type State = "loading" | "ready" | "unavailable";
 
@@ -26,34 +27,23 @@ export function App() {
     return () => controller.abort();
   }, []);
 
-  return (
-    <main>
-      <section
-        className="panel"
-        aria-labelledby="product-title"
-        aria-busy={state === "loading"}
-      >
-        <p className="eyebrow">Northstar</p>
-        <h1 id="product-title">CRM workspace</h1>
-        {state === "loading" && (
-          <p role="status">Connecting to your workspace…</p>
-        )}
-        {state === "ready" && <p role="status">Your workspace is ready.</p>}
-        {state === "unavailable" && (
-          <div role="alert">
-            <h2>Workspace unavailable</h2>
-            <p>
-              Check your connection, then reload the page. Your saved data has
-              not been changed.
-            </p>
-            <button type="button" onClick={() => window.location.reload()}>
-              Reload
-            </button>
-          </div>
-        )}
-      </section>
-    </main>
-  );
+  if (state === "loading")
+    return (
+      <main aria-busy="true">
+        <OperationalState kind="loading" message="Loading Northstar CRM…" />
+      </main>
+    );
+  if (state === "unavailable")
+    return (
+      <main>
+        <OperationalState
+          kind="error"
+          title="Northstar CRM is unavailable"
+          message="Check the server connection, then refresh this page. Your saved data has not been changed."
+        />
+      </main>
+    );
+  return <WorkspacePreview />;
 }
 
 export class AppErrorBoundary extends Component<
@@ -71,14 +61,11 @@ export class AppErrorBoundary extends Component<
     if (this.state.failed)
       return (
         <main>
-          <section className="panel" role="alert">
-            <h1>Something went wrong</h1>
-            <p>
-              Reload the page to try again. Your saved data has not been
-              changed.
-            </p>
-            <button onClick={() => window.location.reload()}>Reload</button>
-          </section>
+          <OperationalState
+            kind="error"
+            title="Something went wrong"
+            message="Reload the page to try again. Your saved data has not been changed."
+          />
         </main>
       );
     return this.props.children;

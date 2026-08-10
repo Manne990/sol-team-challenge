@@ -48,7 +48,7 @@ const icons: Record<string, ReactNode> = {
   ),
 };
 
-export const defaultNavigation: NavigationItem[] = [
+const defaultNavigation: NavigationItem[] = [
   { href: "/", label: "Dashboard", icon: icons.dashboard },
   { href: "/companies", label: "Companies", icon: icons.companies },
   { href: "/contacts", label: "Contacts", icon: icons.contacts },

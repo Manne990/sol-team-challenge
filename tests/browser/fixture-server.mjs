@@ -1,3 +1,4 @@
+/* global process, URL, console */
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
