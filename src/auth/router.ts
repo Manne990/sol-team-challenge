@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import {
   Router,
@@ -36,6 +37,27 @@ export function createAuthRouter(
 ) {
   const router = Router();
   const service = new AuthService(new SqliteAuthRepository(database));
+  const audit = (
+    organizationId: string,
+    actorId: string,
+    action: string,
+    requestId: string,
+  ) =>
+    database
+      .prepare(
+        "INSERT INTO audit_events(id,organization_id,actor_id,action,entity_type,entity_id,correlation_id,summary_json,occurred_at) VALUES(?,?,?,?,?,?,?,?,?)",
+      )
+      .run(
+        randomUUID(),
+        organizationId,
+        actorId,
+        action,
+        "session",
+        null,
+        requestId,
+        "{}",
+        new Date().toISOString(),
+      );
 
   const sameOrigin = (
     request: Request,
@@ -74,6 +96,12 @@ export function createAuthRouter(
         throw new AuthError("validation", "Enter a valid email and password.");
       }
       const signedIn = await service.signIn(email, password, organizationId);
+      audit(
+        signedIn.principal.organizationId,
+        signedIn.principal.userId,
+        "session.signed_in",
+        String(response.locals.requestId),
+      );
       response.setHeader(
         "set-cookie",
         sessionCookie(signedIn.token, EIGHT_HOURS_SECONDS, secureCookies),
@@ -113,7 +141,19 @@ export function createAuthRouter(
   });
 
   router.delete("/session", sameOrigin, async (request, response) => {
-    await service.logout(readSessionCookie(request.header("cookie")));
+    const token = readSessionCookie(request.header("cookie"));
+    try {
+      const signedIn = await service.authenticate(token);
+      audit(
+        signedIn.organizationId,
+        signedIn.userId,
+        "session.signed_out",
+        String(response.locals.requestId),
+      );
+    } catch {
+      /* logout stays idempotent */
+    }
+    await service.logout(token);
     response.setHeader("set-cookie", clearSessionCookie(secureCookies));
     response.status(204).end();
   });

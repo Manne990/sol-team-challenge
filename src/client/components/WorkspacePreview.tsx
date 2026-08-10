@@ -5,6 +5,7 @@ import { TasksPage } from "./TasksPage";
 import { SearchPage } from "./SearchPage";
 import { DealsPage } from "../DealsPage";
 import { NotificationsPage } from "../NotificationsPage";
+import { AdminPage } from "./AdminPage";
 import { DashboardPage } from "../DashboardPage";
 
 export function WorkspacePreview({
@@ -43,6 +44,10 @@ export function WorkspacePreview({
         <DealsPage role={role} userId={userId} />
       ) : path.startsWith("/notifications") ? (
         <NotificationsPage />
+      ) : path.startsWith("/admin") ? (
+        <AdminPage />
+      ) : path.startsWith("/audit") ? (
+        <AdminPage auditOnly />
       ) : (
         <DashboardPage navigate={navigate} />
       )}

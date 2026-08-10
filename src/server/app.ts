@@ -14,6 +14,7 @@ import { contactsRouter } from "./contacts/routes.js";
 import { createTasksRouter } from "../tasks/router.js";
 import { createSearchRouter } from "../search/router.js";
 import { notificationsRouter } from "./notifications.js";
+import { createAdminRouter } from "../admin/router.js";
 
 export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
   const app = express();
@@ -43,6 +44,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/imports", createImportsRouter(database, secureCookies));
     app.use("/api/activities", createActivitiesRouter(database, secureCookies));
     app.use("/api/notifications", notificationsRouter(database, secureCookies));
+    app.use("/api/admin", createAdminRouter(database, secureCookies));
     app.use("/api/dashboard", createDashboardRouter(database));
   }
   app.use("/api", (_request, response) => {

@@ -8,6 +8,7 @@ export default defineConfig({
       "test/companies-http.test.ts",
       "test/tasks-http.test.ts",
       "test/search-http.test.ts",
+      "test/admin-http.test.ts",
       "test/deals-http.test.ts",
       "test/dashboard-http.test.ts",
       "test/imports-http.test.ts",

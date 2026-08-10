@@ -716,6 +716,18 @@ a {
   color: var(--ns-danger);
   font-size: 1.2rem;
 }
+.ns-admin-settings {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  align-items: end;
+  gap: 0.75rem;
+  max-width: 1280px;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
 .ns-pagination {
   display: flex;
   align-items: center;
@@ -941,6 +953,9 @@ label.ns-checkbox {
   cursor: pointer;
 }
 @media (max-width: 760px) {
+  .ns-admin-settings {
+    grid-template-columns: 1fr;
+  }
   .ns-global-search {
     align-items: stretch;
     flex-direction: column;
