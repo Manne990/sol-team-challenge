@@ -11,5 +11,5 @@
     "sourceMap": true,
     "noEmit": false
   },
-  "include": ["src/server/**/*.ts", "src/shared/**/*.ts"]
+  "include": ["src/auth/**/*.ts", "src/server/**/*.ts", "src/shared/**/*.ts"]
 }

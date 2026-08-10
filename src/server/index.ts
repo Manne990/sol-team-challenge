@@ -1,11 +1,16 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
 
 async function start() {
   const config = loadConfig();
-  const app = createApp();
+  const database = new DatabaseSync(config.databasePath);
+  database.exec(
+    "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;",
+  );
+  const app = createApp(database, config.production);
 
   if (config.production) {
     const clientDirectory = resolve("dist/client");
@@ -38,7 +43,11 @@ async function start() {
     );
     console.log(`Database: ${config.databasePath}`);
   });
-  const shutdown = () => server.close(() => process.exit(0));
+  const shutdown = () =>
+    server.close(() => {
+      database.close();
+      process.exit(0);
+    });
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);
 }
