@@ -1,9 +1,9 @@
 {
   "name": "northstar-crm-challenge",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Source-identical baseline for the SOL versus Gaia CRM challenge",
+  "description": "Northstar CRM",
   "engines": {
     "node": ">=22"
   },
@@ -11,21 +11,44 @@
     "db:reset": "node scripts/db.mjs reset",
     "db:seed": "node scripts/db.mjs seed",
     "db:test": "node --test tests/database.test.mjs",
+    "dev": "tsx src/server/index.ts",
+    "start": "NODE_ENV=production node dist/server/src/server/index.js",
+    "format": "prettier --check .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
+    "format:write": "prettier --write .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test": "vitest run",
     "test:policy": "node scripts/test-policy.mjs",
     "test:unit": "vitest run",
     "test:browser": "playwright test",
-    "ci": "npm run format:check && npm run typecheck && npm run test:policy && npm run db:test && npm run test:unit && npm run test:browser",
-    "build": "node scripts/baseline.mjs build",
-    "dev": "node scripts/baseline.mjs dev"
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "ci": "npm run format && npm run lint && npm run typecheck && npm run test:policy && npm run db:test && npm run test:unit && npm run test:browser && npm run build"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "express": "^5.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
+    "@eslint/js": "^9.33.0",
     "@playwright/test": "^1.62.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.3",
     "@types/node": "^24.2.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0",
+    "vite": "^7.1.1",
     "vitest": "^4.1.10"
   }
 }
