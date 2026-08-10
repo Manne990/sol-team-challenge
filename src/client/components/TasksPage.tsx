@@ -10,6 +10,7 @@ import {
   PageHeader,
   Pagination,
   Select,
+  SaveViewButton,
   StatusBadge,
   TextInput,
   Toast,
@@ -45,9 +46,12 @@ export function TasksPage({
   role: UserRole;
   userId: string;
 }) {
-  const params = new URLSearchParams(location.search),
+  const detailId = location.pathname.match(/^\/tasks\/([^/]+)$/)?.[1],
+    params = new URLSearchParams(location.search),
     [view, setView] = useState(params.get("view") ?? "mine"),
     [page, setPage] = useState(Number(params.get("page")) || 1),
+    [sort, setSort] = useState(params.get("sort") ?? "due"),
+    [direction, setDirection] = useState(params.get("direction") ?? "asc"),
     [data, setData] = useState<Page>({
       items: [],
       page: 1,
@@ -58,11 +62,17 @@ export function TasksPage({
     [members, setMembers] = useState<Member[]>([]),
     [state, setState] = useState<"loading" | "ready" | "error">("loading"),
     [open, setOpen] = useState(false),
+    [selected, setSelected] = useState<Task | null>(null),
     [message, setMessage] = useState("");
   const load = useCallback(async () => {
     setState("loading");
     try {
-      const query = new URLSearchParams({ view, page: String(page) });
+      const query = new URLSearchParams({
+        view,
+        page: String(page),
+        sort,
+        direction,
+      });
       history.replaceState(null, "", `/tasks?${query}`);
       const [list, meta] = await Promise.all([
         fetch(`/api/tasks?${query}`),
@@ -75,10 +85,17 @@ export function TasksPage({
     } catch {
       setState("error");
     }
-  }, [view, page]);
+  }, [view, page, sort, direction]);
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    if (!detailId) return;
+    fetch(`/api/tasks/${detailId}`).then(async (response) => {
+      if (response.ok) setSelected((await response.json()) as Task);
+      else setMessage("The requested task was not found");
+    });
+  }, [detailId]);
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget),
@@ -92,6 +109,9 @@ export function TasksPage({
           dueAt: new Date(String(form.get("dueAt"))).toISOString(),
           priority: form.get("priority"),
           status: "open",
+          companyId: form.get("companyId") || null,
+          contactId: form.get("contactId") || null,
+          dealId: form.get("dealId") || null,
         }),
       });
     if (response.ok) {
@@ -122,9 +142,15 @@ export function TasksPage({
         title="Tasks"
         description="Follow-up commitments use UTC for storage and due-state boundaries; times display in your browser timezone."
         actions={
-          role !== "viewer" ? (
-            <Button onClick={() => setOpen(true)}>Add task</Button>
-          ) : undefined
+          <>
+            <SaveViewButton
+              resource="tasks"
+              definition={{ view, sort, direction }}
+            />
+            {role !== "viewer" && (
+              <Button onClick={() => setOpen(true)}>Add task</Button>
+            )}
+          </>
         }
       />
       <FilterBar
@@ -151,6 +177,27 @@ export function TasksPage({
             <option value="completed">Completed</option>
           </Select>
         </label>
+        <Field label="Sort by">
+          <Select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            <option value="due">Due date</option>
+            <option value="title">Title</option>
+            <option value="priority">Priority</option>
+            <option value="status">Status</option>
+            <option value="updated">Updated</option>
+          </Select>
+        </Field>
+        <Field label="Direction">
+          <Select
+            value={direction}
+            onChange={(event) => setDirection(event.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Select>
+        </Field>
       </FilterBar>
       {state === "loading" ? (
         <OperationalState kind="loading" />
@@ -181,7 +228,12 @@ export function TasksPage({
             {data.items.map((item) => (
               <tr key={item.id}>
                 <td>
-                  <strong>{item.title}</strong>
+                  <button
+                    className="ns-table-link"
+                    onClick={() => setSelected(item)}
+                  >
+                    {item.title}
+                  </button>
                   <br />
                   <small>
                     {[item.companyName, item.contactName, item.dealName]
@@ -288,6 +340,15 @@ export function TasksPage({
               <option value="urgent">Urgent</option>
             </Select>
           </Field>
+          <Field label="Related company ID">
+            <TextInput name="companyId" />
+          </Field>
+          <Field label="Related contact ID">
+            <TextInput name="contactId" />
+          </Field>
+          <Field label="Related deal ID">
+            <TextInput name="dealId" />
+          </Field>
           <div className="ns-dialog-actions">
             <Button
               variant="secondary"
@@ -299,6 +360,29 @@ export function TasksPage({
             <Button type="submit">Create task</Button>
           </div>
         </form>
+      </Dialog>
+      <Dialog
+        open={Boolean(selected)}
+        title={selected?.title ?? "Task detail"}
+        description="Follow-up work and originating CRM relationships."
+        onClose={() => setSelected(null)}
+      >
+        {selected && (
+          <dl>
+            <dt>Description</dt>
+            <dd>{selected.description || "—"}</dd>
+            <dt>Assignee</dt>
+            <dd>{selected.assigneeName}</dd>
+            <dt>Due</dt>
+            <dd>{new Date(selected.dueAt).toLocaleString()}</dd>
+            <dt>Company</dt>
+            <dd>{selected.companyName ?? "—"}</dd>
+            <dt>Contact</dt>
+            <dd>{selected.contactName ?? "—"}</dd>
+            <dt>Deal</dt>
+            <dd>{selected.dealName ?? "—"}</dd>
+          </dl>
+        )}
       </Dialog>
       {message && (
         <ToastRegion>

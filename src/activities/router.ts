@@ -184,6 +184,16 @@ export function createActivitiesRouter(
         values.push(utc(request.query.to, "To"));
       }
       const where = conditions.join(" AND ");
+      const sort =
+        (
+          {
+            occurred: "occurred_at",
+            subject: "subject",
+            type: "type",
+            updated: "updated_at",
+          } as Record<string, string>
+        )[String(request.query.sort)] ?? "occurred_at";
+      const direction = request.query.direction === "asc" ? "ASC" : "DESC";
       const total = Number(
         (
           database
@@ -193,7 +203,7 @@ export function createActivitiesRouter(
       );
       const rows = database
         .prepare(
-          `SELECT * FROM activities WHERE ${where} ORDER BY occurred_at DESC,id DESC LIMIT ? OFFSET ?`,
+          `SELECT * FROM activities WHERE ${where} ORDER BY ${sort} ${direction},id ${direction} LIMIT ? OFFSET ?`,
         )
         .all(...values, pageSize, (page - 1) * pageSize) as Row[];
       response.json({

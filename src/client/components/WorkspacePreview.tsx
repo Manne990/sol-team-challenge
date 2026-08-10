@@ -8,6 +8,9 @@ import { NotificationsPage } from "../NotificationsPage";
 import { AdminPage } from "./AdminPage";
 import { DashboardPage } from "../DashboardPage";
 import { DuplicatesPage } from "./DuplicatesPage";
+import { ContactsPage } from "../ContactsPage";
+import { ActivitiesPage } from "../ActivitiesPage";
+import { ImportsPage } from "../ImportsPage";
 
 export function WorkspacePreview({
   role = "owner",
@@ -43,6 +46,12 @@ export function WorkspacePreview({
     >
       {path.startsWith("/companies") ? (
         <CompaniesPage role={role} />
+      ) : path.startsWith("/contacts") ? (
+        <ContactsPage role={role} />
+      ) : path.startsWith("/activities") ? (
+        <ActivitiesPage role={role} userId={userId} />
+      ) : path.startsWith("/imports") ? (
+        <ImportsPage role={role} />
       ) : path.startsWith("/tasks") ? (
         <TasksPage role={role} userId={userId} />
       ) : path.startsWith("/search") ? (

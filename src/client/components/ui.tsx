@@ -47,6 +47,35 @@ export function Button({
   );
 }
 
+export function SaveViewButton({
+  resource,
+  definition,
+}: {
+  resource: "companies" | "contacts" | "deals" | "tasks";
+  definition: Record<string, string>;
+}) {
+  async function save() {
+    const name = window.prompt("Name this personal view");
+    if (!name?.trim()) return;
+    const response = await fetch("/api/search/views", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, resource, definition }),
+    });
+    window.alert(
+      response.ok
+        ? "Personal view saved."
+        : ((await response.json()) as { error: { message: string } }).error
+            .message,
+    );
+  }
+  return (
+    <Button variant="secondary" onClick={() => void save()}>
+      Save current view
+    </Button>
+  );
+}
+
 export function Field({
   label,
   hint,

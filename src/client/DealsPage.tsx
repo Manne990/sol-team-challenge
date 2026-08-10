@@ -9,6 +9,7 @@ import {
   OperationalState,
   PageHeader,
   Select,
+  SaveViewButton,
   StatusBadge,
   TextInput,
   Toast,
@@ -35,6 +36,7 @@ type Deal = {
   lossReason: string | null;
   expectedCloseDate: string | null;
   version: number;
+  contacts?: { id: string; name: string }[];
 };
 type Payload = { items: Deal[]; stages: Stage[]; total: number };
 
@@ -45,9 +47,12 @@ export function DealsPage({
   role: UserRole;
   userId: string;
 }) {
+  const detailId = location.pathname.match(/^\/deals\/([^/]+)$/)?.[1];
   const initial = new URLSearchParams(location.search);
   const [status, setStatus] = useState(initial.get("status") ?? "open");
   const [view, setView] = useState(initial.get("view") ?? "pipeline");
+  const [sort, setSort] = useState(initial.get("sort") ?? "stage");
+  const [direction, setDirection] = useState(initial.get("direction") ?? "asc");
   const closeFrom = initial.get("closeFrom") ?? "";
   const closeTo = initial.get("closeTo") ?? "";
   const [data, setData] = useState<Payload>({
@@ -62,7 +67,7 @@ export function DealsPage({
   const [toast, setToast] = useState("");
   const load = useCallback(async () => {
     setState("loading");
-    const params = new URLSearchParams({ status, view });
+    const params = new URLSearchParams({ status, view, sort, direction });
     if (closeFrom) params.set("closeFrom", closeFrom);
     if (closeTo) params.set("closeTo", closeTo);
     history.replaceState(null, "", `/deals?${params}`);
@@ -74,10 +79,18 @@ export function DealsPage({
     } catch {
       setState("error");
     }
-  }, [status, view, closeFrom, closeTo]);
+  }, [status, view, sort, direction, closeFrom, closeTo]);
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    if (detailId) void openDeal(detailId);
+  }, [detailId]);
+  async function openDeal(id: string) {
+    const response = await fetch(`/api/deals/${id}`);
+    if (response.ok) setSelected((await response.json()) as Deal);
+    else setToast("The requested deal was not found.");
+  }
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -93,7 +106,10 @@ export function DealsPage({
         currency: form.get("currency"),
         probability: Number(form.get("probability")),
         expectedCloseDate: form.get("expectedCloseDate"),
-        contactIds: [],
+        contactIds: String(form.get("contactIds") ?? "")
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean),
       }),
     });
     if (response.ok) {
@@ -172,7 +188,10 @@ export function DealsPage({
         currency: form.get("currency"),
         probability: Number(form.get("probability")),
         expectedCloseDate: form.get("expectedCloseDate"),
-        contactIds: [],
+        contactIds: String(form.get("contactIds") ?? "")
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean),
         version: selected.version,
       }),
     });
@@ -195,9 +214,15 @@ export function DealsPage({
         title="Deals"
         description="Pipeline value, outcomes, and stage history."
         actions={
-          role !== "viewer" ? (
-            <Button onClick={() => setDialog(true)}>Add deal</Button>
-          ) : undefined
+          <>
+            <SaveViewButton
+              resource="deals"
+              definition={{ status, view, sort, direction }}
+            />
+            {role !== "viewer" && (
+              <Button onClick={() => setDialog(true)}>Add deal</Button>
+            )}
+          </>
         }
       />
       <FilterBar
@@ -216,6 +241,27 @@ export function DealsPage({
             <option value="lost">Lost</option>
           </Select>
         </label>
+        <Field label="Sort by">
+          <Select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            <option value="stage">Stage</option>
+            <option value="name">Name</option>
+            <option value="amount">Value</option>
+            <option value="closeDate">Close date</option>
+            <option value="updated">Updated</option>
+          </Select>
+        </Field>
+        <Field label="Direction">
+          <Select
+            value={direction}
+            onChange={(event) => setDirection(event.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Select>
+        </Field>
         <label className="ns-field">
           <span>View</span>
           <Select
@@ -237,7 +283,10 @@ export function DealsPage({
       ) : data.items.length === 0 ? (
         <OperationalState kind="empty" title="No deals found" />
       ) : view === "list" ? (
-        <DealTable deals={data.items} onOpen={setSelected} />
+        <DealTable
+          deals={data.items}
+          onOpen={(deal) => void openDeal(deal.id)}
+        />
       ) : (
         <section className="ns-pipeline" aria-label="Sales pipeline">
           {data.stages.map((stage) => (
@@ -252,7 +301,10 @@ export function DealsPage({
                   <p>{deal.company.name}</p>
                   <strong>{money(deal)}</strong>
                   <p>{deal.probability}% probability</p>
-                  <Button variant="quiet" onClick={() => setSelected(deal)}>
+                  <Button
+                    variant="quiet"
+                    onClick={() => void openDeal(deal.id)}
+                  >
                     View deal
                   </Button>
                   {role !== "viewer" && (
@@ -335,6 +387,12 @@ export function DealsPage({
           <Field label="Expected close date">
             <TextInput name="expectedCloseDate" type="date" />
           </Field>
+          <Field
+            label="Contact IDs"
+            hint="Separate multiple contact IDs with commas."
+          >
+            <TextInput name="contactIds" />
+          </Field>
           <Button type="submit">Create deal</Button>
         </form>
       </Dialog>
@@ -359,6 +417,11 @@ export function DealsPage({
               <dd>{selected.status}</dd>
               <dt>Loss reason</dt>
               <dd>{selected.lossReason ?? "—"}</dd>
+              <dt>Contacts</dt>
+              <dd>
+                {selected.contacts?.map((contact) => contact.name).join(", ") ||
+                  "—"}
+              </dd>
             </dl>
             {role !== "viewer" && (
               <div className="ns-dialog-actions">
@@ -436,6 +499,18 @@ export function DealsPage({
                 name="expectedCloseDate"
                 type="date"
                 defaultValue={selected.expectedCloseDate ?? ""}
+              />
+            </Field>
+            <Field
+              label="Contact IDs"
+              hint="Separate multiple contact IDs with commas."
+            >
+              <TextInput
+                name="contactIds"
+                defaultValue={
+                  selected.contacts?.map((contact) => contact.id).join(", ") ??
+                  ""
+                }
               />
             </Field>
             <Button type="submit">Save deal</Button>
