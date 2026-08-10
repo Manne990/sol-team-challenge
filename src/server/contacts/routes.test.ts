@@ -198,6 +198,19 @@ describe.sequential("contact API", () => {
     expect(JSON.stringify(body)).not.toContain("Outside");
   });
 
+  it("provides a quiet not-found result for browser record navigation", async () => {
+    const cookie = await signIn("owner@northstar.test", "OwnerPass!2026");
+    const navigation = await request(
+      "/api/contacts/not-a-real-contact?navigation=true",
+      cookie,
+    );
+    expect(navigation.status).toBe(200);
+    expect(await navigation.json()).toEqual({ contact: null });
+    expect(
+      (await request("/api/contacts/not-a-real-contact", cookie)).status,
+    ).toBe(404);
+  });
+
   it("creates, normalizes, warns, updates, archives, restores, and retains related history", async () => {
     const cookie = await signIn("member@northstar.test", "MemberPass!2026");
     const create = await request("/api/contacts", cookie, {
