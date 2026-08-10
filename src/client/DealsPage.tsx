@@ -8,6 +8,7 @@ import {
   FilterBar,
   OperationalState,
   PageHeader,
+  Pagination,
   Select,
   SaveViewButton,
   StatusBadge,
@@ -38,7 +39,13 @@ type Deal = {
   version: number;
   contacts?: { id: string; name: string }[];
 };
-type Payload = { items: Deal[]; stages: Stage[]; total: number };
+type Payload = {
+  items: Deal[];
+  stages: Stage[];
+  total: number;
+  page: number;
+  totalPages: number;
+};
 
 export function DealsPage({
   role,
@@ -51,6 +58,8 @@ export function DealsPage({
   const initial = new URLSearchParams(location.search);
   const [status, setStatus] = useState(initial.get("status") ?? "open");
   const [view, setView] = useState(initial.get("view") ?? "pipeline");
+  const [stageId, setStageId] = useState(initial.get("stageId") ?? "");
+  const [page, setPage] = useState(Number(initial.get("page")) || 1);
   const [sort, setSort] = useState(initial.get("sort") ?? "stage");
   const [direction, setDirection] = useState(initial.get("direction") ?? "asc");
   const closeFrom = initial.get("closeFrom") ?? "";
@@ -59,6 +68,8 @@ export function DealsPage({
     items: [],
     stages: [],
     total: 0,
+    page: 1,
+    totalPages: 0,
   });
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [dialog, setDialog] = useState(false);
@@ -67,7 +78,14 @@ export function DealsPage({
   const [toast, setToast] = useState("");
   const load = useCallback(async () => {
     setState("loading");
-    const params = new URLSearchParams({ status, view, sort, direction });
+    const params = new URLSearchParams({
+      status,
+      view,
+      sort,
+      direction,
+      page: String(page),
+    });
+    if (stageId) params.set("stageId", stageId);
     if (closeFrom) params.set("closeFrom", closeFrom);
     if (closeTo) params.set("closeTo", closeTo);
     history.replaceState(null, "", `/deals?${params}`);
@@ -79,7 +97,7 @@ export function DealsPage({
     } catch {
       setState("error");
     }
-  }, [status, view, sort, direction, closeFrom, closeTo]);
+  }, [status, view, stageId, page, sort, direction, closeFrom, closeTo]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -217,7 +235,7 @@ export function DealsPage({
           <>
             <SaveViewButton
               resource="deals"
-              definition={{ status, view, sort, direction }}
+              definition={{ status, view, stageId, sort, direction }}
             />
             {role !== "viewer" && (
               <Button onClick={() => setDialog(true)}>Add deal</Button>
@@ -226,8 +244,12 @@ export function DealsPage({
         }
       />
       <FilterBar
-        activeCount={Number(Boolean(status))}
-        onClear={() => setStatus("")}
+        activeCount={Number(Boolean(status)) + Number(Boolean(stageId))}
+        onClear={() => {
+          setStatus("");
+          setStageId("");
+          setPage(1);
+        }}
       >
         <label className="ns-field">
           <span>Status</span>
@@ -241,6 +263,22 @@ export function DealsPage({
             <option value="lost">Lost</option>
           </Select>
         </label>
+        <Field label="Stage">
+          <Select
+            value={stageId}
+            onChange={(event) => {
+              setStageId(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All stages</option>
+            {data.stages.map((stage) => (
+              <option key={stage.id} value={stage.id}>
+                {stage.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
         <Field label="Sort by">
           <Select
             value={sort}
@@ -330,6 +368,13 @@ export function DealsPage({
             </section>
           ))}
         </section>
+      )}
+      {state === "ready" && data.totalPages > 1 && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          onPageChange={setPage}
+        />
       )}
       <Dialog
         open={dialog}

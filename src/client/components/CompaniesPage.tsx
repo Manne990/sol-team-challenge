@@ -65,6 +65,9 @@ function CompanyList({ role }: { role: UserRole }) {
   const initial = new URLSearchParams(location.search);
   const [query, setQuery] = useState(initial.get("q") ?? "");
   const [lifecycle, setLifecycle] = useState(initial.get("lifecycle") ?? "");
+  const [staleBefore, setStaleBefore] = useState(
+    initial.get("staleBefore") ?? "",
+  );
   const [page, setPage] = useState(Number(initial.get("page")) || 1);
   const [sort, setSort] = useState(initial.get("sort") ?? "updated");
   const [direction, setDirection] = useState(
@@ -83,6 +86,7 @@ function CompanyList({ role }: { role: UserRole }) {
     });
     if (query) params.set("q", query);
     if (lifecycle) params.set("lifecycle", lifecycle);
+    if (staleBefore) params.set("staleBefore", staleBefore);
     history.replaceState(null, "", `/companies?${params}`);
     try {
       const response = await fetch(`/api/companies?${params}`);
@@ -92,7 +96,7 @@ function CompanyList({ role }: { role: UserRole }) {
     } catch {
       setState("error");
     }
-  }, [query, lifecycle, page, sort, direction]);
+  }, [query, lifecycle, staleBefore, page, sort, direction]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -112,6 +116,7 @@ function CompanyList({ role }: { role: UserRole }) {
         size: form.get("size"),
         address: form.get("address"),
         lifecycleStatus: form.get("lifecycleStatus"),
+        ownerId: form.get("ownerId") || null,
         tags: String(form.get("tags") ?? "")
           .split(",")
           .map((x) => x.trim())
@@ -138,8 +143,14 @@ function CompanyList({ role }: { role: UserRole }) {
           <>
             <SaveViewButton
               resource="companies"
-              definition={{ q: query, lifecycle, sort, direction }}
+              definition={{ q: query, lifecycle, staleBefore, sort, direction }}
             />
+            <a
+              className="ns-button ns-button-secondary"
+              href={`/api/imports/exports/companies.csv?${new URLSearchParams({ q: query, lifecycle, staleBefore })}`}
+            >
+              Export filtered CSV
+            </a>
             {role !== "viewer" && (
               <Button onClick={() => setDialog(true)}>Add company</Button>
             )}
@@ -147,10 +158,15 @@ function CompanyList({ role }: { role: UserRole }) {
         }
       />
       <FilterBar
-        activeCount={Number(Boolean(query)) + Number(Boolean(lifecycle))}
+        activeCount={
+          Number(Boolean(query)) +
+          Number(Boolean(lifecycle)) +
+          Number(Boolean(staleBefore))
+        }
         onClear={() => {
           setQuery("");
           setLifecycle("");
+          setStaleBefore("");
           setPage(1);
         }}
       >
@@ -166,6 +182,16 @@ function CompanyList({ role }: { role: UserRole }) {
             }}
           />
         </label>
+        <Field label="Stale before">
+          <TextInput
+            type="date"
+            value={staleBefore}
+            onChange={(event) => {
+              setStaleBefore(event.target.value);
+              setPage(1);
+            }}
+          />
+        </Field>
         <Field label="Sort by">
           <Select
             value={sort}
@@ -301,6 +327,9 @@ function CompanyList({ role }: { role: UserRole }) {
               <option value="partner">Partner</option>
             </Select>
           </Field>
+          <Field label="Owner user ID">
+            <TextInput name="ownerId" />
+          </Field>
           <Field label="Tags" hint="Separate tags with commas">
             <TextInput name="tags" />
           </Field>
@@ -377,7 +406,7 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
         .map((x) => x.trim())
         .filter(Boolean),
       description: data.get("description"),
-      ownerId: item.ownerId,
+      ownerId: data.get("ownerId") || null,
       version: item.version,
     };
     const response = await fetch(`/api/companies/${encodeURIComponent(id)}`, {
@@ -583,6 +612,9 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
                 </option>
               ))}
             </Select>
+          </Field>
+          <Field label="Owner user ID">
+            <TextInput name="ownerId" defaultValue={item.ownerId ?? ""} />
           </Field>
           <Field label="Tags">
             <TextInput name="tags" defaultValue={item.tags.join(", ")} />
