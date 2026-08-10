@@ -11,6 +11,7 @@ import {
   PageHeader,
   Pagination,
   Select,
+  SaveViewButton,
   StatusBadge,
   TextInput,
   Toast,
@@ -88,11 +89,14 @@ async function api(path: string, init?: RequestInit) {
 }
 
 export function ContactsPage({ role }: { role: Role }) {
+  const detailId = location.pathname.match(/^\/contacts\/([^/]+)$/)?.[1];
   const initial = new URLSearchParams(location.search);
   const [filters, setFilters] = useState({
     q: initial.get("q") ?? "",
     status: initial.get("status") ?? "",
     tag: initial.get("tag") ?? "",
+    sort: initial.get("sort") ?? "name",
+    direction: initial.get("direction") ?? "asc",
     page: Number(initial.get("page")) || 1,
   });
   const [list, setList] = useState<{
@@ -133,6 +137,9 @@ export function ContactsPage({ role }: { role: Role }) {
     history.replaceState(null, "", `/contacts${query ? `?${query}` : ""}`);
     void load();
   }, [load, query]);
+  useEffect(() => {
+    if (detailId) void openContact(detailId);
+  }, [detailId]);
   const setFilter = (key: keyof typeof filters, value: string | number) =>
     setFilters((current) => ({
       ...current,
@@ -213,16 +220,35 @@ export function ContactsPage({ role }: { role: Role }) {
         title="Contacts"
         description="People across customer accounts and independent relationships."
         actions={
-          canEdit ? (
-            <Button onClick={() => openForm()}>Add contact</Button>
-          ) : undefined
+          <>
+            <SaveViewButton
+              resource="contacts"
+              definition={{
+                q: filters.q,
+                status: filters.status,
+                tag: filters.tag,
+                sort: filters.sort,
+                direction: filters.direction,
+              }}
+            />
+            {canEdit && <Button onClick={() => openForm()}>Add contact</Button>}
+          </>
         }
       />
       <FilterBar
         activeCount={
           [filters.q, filters.status, filters.tag].filter(Boolean).length
         }
-        onClear={() => setFilters({ q: "", status: "", tag: "", page: 1 })}
+        onClear={() =>
+          setFilters({
+            q: "",
+            status: "",
+            tag: "",
+            sort: "name",
+            direction: "asc",
+            page: 1,
+          })
+        }
       >
         <Field label="Search">
           <TextInput
@@ -247,6 +273,25 @@ export function ContactsPage({ role }: { role: Role }) {
             value={filters.tag}
             onChange={(event) => setFilter("tag", event.target.value)}
           />
+        </Field>
+        <Field label="Sort by">
+          <Select
+            value={filters.sort}
+            onChange={(event) => setFilter("sort", event.target.value)}
+          >
+            <option value="name">Name</option>
+            <option value="email">Email</option>
+            <option value="updatedAt">Updated</option>
+          </Select>
+        </Field>
+        <Field label="Direction">
+          <Select
+            value={filters.direction}
+            onChange={(event) => setFilter("direction", event.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Select>
         </Field>
       </FilterBar>
       {list.status === "loading" ? (

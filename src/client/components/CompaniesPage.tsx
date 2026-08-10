@@ -11,6 +11,7 @@ import {
   PageHeader,
   Pagination,
   Select,
+  SaveViewButton,
   StatusBadge,
   TextInput,
   Toast,
@@ -65,6 +66,10 @@ function CompanyList({ role }: { role: UserRole }) {
   const [query, setQuery] = useState(initial.get("q") ?? "");
   const [lifecycle, setLifecycle] = useState(initial.get("lifecycle") ?? "");
   const [page, setPage] = useState(Number(initial.get("page")) || 1);
+  const [sort, setSort] = useState(initial.get("sort") ?? "updated");
+  const [direction, setDirection] = useState(
+    initial.get("direction") ?? "desc",
+  );
   const [data, setData] = useState(empty);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [dialog, setDialog] = useState(false);
@@ -73,8 +78,8 @@ function CompanyList({ role }: { role: UserRole }) {
     setState("loading");
     const params = new URLSearchParams({
       page: String(page),
-      sort: "updated",
-      direction: "desc",
+      sort,
+      direction,
     });
     if (query) params.set("q", query);
     if (lifecycle) params.set("lifecycle", lifecycle);
@@ -87,7 +92,7 @@ function CompanyList({ role }: { role: UserRole }) {
     } catch {
       setState("error");
     }
-  }, [query, lifecycle, page]);
+  }, [query, lifecycle, page, sort, direction]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -130,9 +135,15 @@ function CompanyList({ role }: { role: UserRole }) {
         title="Companies"
         description="Customer and prospect accounts, ownership, and relationship history."
         actions={
-          role !== "viewer" ? (
-            <Button onClick={() => setDialog(true)}>Add company</Button>
-          ) : undefined
+          <>
+            <SaveViewButton
+              resource="companies"
+              definition={{ q: query, lifecycle, sort, direction }}
+            />
+            {role !== "viewer" && (
+              <Button onClick={() => setDialog(true)}>Add company</Button>
+            )}
+          </>
         }
       />
       <FilterBar
@@ -155,6 +166,26 @@ function CompanyList({ role }: { role: UserRole }) {
             }}
           />
         </label>
+        <Field label="Sort by">
+          <Select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            <option value="updated">Updated</option>
+            <option value="name">Name</option>
+            <option value="industry">Industry</option>
+            <option value="lifecycle">Lifecycle</option>
+          </Select>
+        </Field>
+        <Field label="Direction">
+          <Select
+            value={direction}
+            onChange={(event) => setDirection(event.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Select>
+        </Field>
         <label className="ns-field">
           <span>Lifecycle</span>
           <Select

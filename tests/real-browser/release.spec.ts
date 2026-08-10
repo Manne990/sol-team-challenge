@@ -55,7 +55,9 @@ test("real activity journey creates, edits, and deletes persisted data", async (
     .locator("header")
     .getByRole("button", { name: "Record activity" })
     .click();
-  await page.getByLabel("Subject").fill("Release deletion journey");
+  await page
+    .getByRole("textbox", { name: "Subject", exact: true })
+    .fill("Release deletion journey");
   await page.getByRole("textbox", { name: "Notes" }).fill("Initial narrative");
   await page
     .getByRole("dialog")
@@ -126,4 +128,56 @@ test("outside owner sees the authenticated outside organization and identity", a
   await expect(page.getByText("Northstar Demo", { exact: true })).toHaveCount(
     0,
   );
+});
+
+test("search and originating links open records while relationships and combined views are editable", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/search?q=Contact01");
+  await page.getByRole("button", { name: /Contact01 Example/u }).click();
+  await expect(page.getByRole("dialog")).toContainText("Contact01 Example");
+  const ids = await page.evaluate(async () => {
+    const deals = (await (await fetch("/api/deals?pageSize=1")).json()) as {
+      items: { id: string; name: string }[];
+    };
+    const tasks = (await (
+      await fetch("/api/tasks?view=&pageSize=1")
+    ).json()) as { items: { id: string; title: string }[] };
+    return { deal: deals.items[0]!, task: tasks.items[0]! };
+  });
+  await page.goto(`/deals/${ids.deal.id}`);
+  await expect(page.getByRole("dialog")).toContainText(ids.deal.name);
+  await page.getByRole("button", { name: "Edit deal" }).click();
+  await expect(page.getByLabel("Contact IDs")).toBeVisible();
+  await page.goto(`/tasks/${ids.task.id}`);
+  await expect(page.getByRole("dialog")).toContainText(ids.task.title);
+  await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+  await page.getByRole("button", { name: "Add task" }).click();
+  await expect(page.getByLabel("Related company ID")).toBeVisible();
+  await expect(page.getByLabel("Related contact ID")).toBeVisible();
+  await expect(page.getByLabel("Related deal ID")).toBeVisible();
+  await page.goto(
+    "/companies?q=Nordic&lifecycle=customer&sort=name&direction=asc",
+  );
+  await expect(page.getByLabel("Sort by")).toHaveValue("name");
+  page.on("dialog", async (dialog) => {
+    await dialog.accept(
+      dialog.type() === "prompt" ? "Nordic customers" : undefined,
+    );
+  });
+  await page.getByRole("button", { name: "Save current view" }).click();
+  const saved = await page.evaluate(async () =>
+    (
+      (await (await fetch("/api/search/views")).json()) as {
+        items: { name: string; definition: Record<string, string> }[];
+      }
+    ).items.find((view) => view.name === "Nordic customers"),
+  );
+  expect(saved?.definition).toMatchObject({
+    q: "Nordic",
+    lifecycle: "customer",
+    sort: "name",
+    direction: "asc",
+  });
 });

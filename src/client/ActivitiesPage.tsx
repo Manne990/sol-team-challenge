@@ -89,6 +89,8 @@ export function ActivitiesPage({
     companyId: initial.get("companyId") ?? "",
     contactId: initial.get("contactId") ?? "",
     from: initial.get("from") ?? "",
+    sort: initial.get("sort") ?? "occurred",
+    direction: initial.get("direction") ?? "desc",
     page: Number(initial.get("page")) || 1,
   });
   const [data, setData] = useState<{
@@ -260,6 +262,8 @@ export function ActivitiesPage({
             companyId: "",
             contactId: "",
             from: "",
+            sort: "occurred",
+            direction: "desc",
             page: 1,
           })
         }
@@ -303,6 +307,26 @@ export function ActivitiesPage({
             value={filters.from}
             onChange={(event) => setFilter("from", event.target.value)}
           />
+        </Field>
+        <Field label="Sort by">
+          <Select
+            value={filters.sort}
+            onChange={(event) => setFilter("sort", event.target.value)}
+          >
+            <option value="occurred">Occurred</option>
+            <option value="subject">Subject</option>
+            <option value="type">Type</option>
+            <option value="updated">Updated</option>
+          </Select>
+        </Field>
+        <Field label="Direction">
+          <Select
+            value={filters.direction}
+            onChange={(event) => setFilter("direction", event.target.value)}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Select>
         </Field>
       </FilterBar>
       {state === "loading" ? (
