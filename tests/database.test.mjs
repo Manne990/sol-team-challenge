@@ -42,7 +42,7 @@ test("migrations are repeatable and create the complete schema", () => {
       assert.ok(tables.includes(name), name);
     assert.equal(
       db.prepare("SELECT count(*) AS n FROM schema_migrations").get().n,
-      2,
+      3,
     );
     db.close();
   } finally {

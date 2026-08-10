@@ -8,6 +8,7 @@ export default defineConfig({
       "test/companies-http.test.ts",
       "test/tasks-http.test.ts",
       "test/deals-http.test.ts",
+      "test/imports-http.test.ts",
     ],
     environment: "node",
     passWithNoTests: false,
