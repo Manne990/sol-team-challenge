@@ -107,6 +107,9 @@ export function ContactsPage({ role }: { role: Role }) {
     total: number;
   }>({ status: "loading", contacts: [], page: 1, pages: 1, total: 0 });
   const [detail, setDetail] = useState<Detail | null>(null);
+  const [detailState, setDetailState] = useState<
+    "idle" | "loading" | "not-found" | "error"
+  >("idle");
   const [form, setForm] = useState<FormState | null>(null);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [error, setError] = useState("");
@@ -134,9 +137,10 @@ export function ContactsPage({ role }: { role: Role }) {
     }
   }, [query]);
   useEffect(() => {
-    history.replaceState(null, "", `/contacts${query ? `?${query}` : ""}`);
+    if (!detailId)
+      history.replaceState(null, "", `/contacts${query ? `?${query}` : ""}`);
     void load();
-  }, [load, query]);
+  }, [detailId, load, query]);
   useEffect(() => {
     if (detailId) void openContact(detailId);
   }, [detailId]);
@@ -147,7 +151,21 @@ export function ContactsPage({ role }: { role: Role }) {
       page: key === "page" ? Number(value) : 1,
     }));
   async function openContact(id: string) {
-    setDetail(await api(`/api/contacts/${id}`));
+    setDetail(null);
+    setDetailState("loading");
+    try {
+      const result = await api(
+        `/api/contacts/${encodeURIComponent(id)}?navigation=true`,
+      );
+      if (!result.contact) {
+        setDetailState("not-found");
+        return;
+      }
+      setDetail(result);
+      setDetailState("idle");
+    } catch {
+      setDetailState("error");
+    }
   }
   function openForm(contact?: Contact) {
     setEditing(contact ?? null);
@@ -241,6 +259,20 @@ export function ContactsPage({ role }: { role: Role }) {
           </>
         }
       />
+      {detailState === "loading" && <OperationalState kind="loading" />}
+      {detailState === "not-found" && <OperationalState kind="not-found" />}
+      {detailState === "error" && (
+        <OperationalState
+          kind="error"
+          action={
+            detailId ? (
+              <Button onClick={() => void openContact(detailId)}>
+                Try again
+              </Button>
+            ) : undefined
+          }
+        />
+      )}
       <FilterBar
         activeCount={
           [filters.q, filters.status, filters.tag].filter(Boolean).length

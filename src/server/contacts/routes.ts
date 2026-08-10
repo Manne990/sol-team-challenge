@@ -344,6 +344,8 @@ export function contactsRouter(
       const user = await authenticate(request);
       const id = String(request.params.contactId);
       const row = existing(user.organizationId, id);
+      if (!row && request.query.navigation === "true")
+        return response.json({ contact: null });
       if (!row)
         return response.status(404).json({
           error: { code: "NOT_FOUND", message: "Contact not found." },

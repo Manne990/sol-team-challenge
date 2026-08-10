@@ -180,6 +180,20 @@ test("search and originating links open records while relationships and combined
     sort: "name",
     direction: "asc",
   });
+
+  const pageErrors: string[] = [];
+  const consoleErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  await page.goto("/contacts/not-a-real-contact");
+  await expect(page).toHaveURL(/\/contacts\/not-a-real-contact$/u);
+  await expect(
+    page.getByRole("heading", { name: "Record not found" }),
+  ).toBeVisible();
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
 });
 
 test("dashboard filters, deal pagination, filtered exports, and company ownership remain operable", async ({
