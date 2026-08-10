@@ -44,7 +44,10 @@ export interface AuthRepository {
   findMembership(id: string): Promise<Membership | null>;
   insertSession(session: SessionRecord): Promise<void>;
   revokeSession(id: string, revokedAt: string): Promise<void>;
-  revokeSessionsForMembership(membershipId: string, revokedAt: string): Promise<void>;
+  revokeSessionsForMembership(
+    membershipId: string,
+    revokedAt: string,
+  ): Promise<void>;
   countActiveOwners(organizationId: string): Promise<number>;
   insertMembership(membership: Membership): Promise<void>;
   updateMembershipRole(id: string, role: Role): Promise<void>;
