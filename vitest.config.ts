@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     include: [
       "tests/unit/**/*.test.ts",
-      "src/**/*.test.ts",
+      "src/**/*.test.{ts,tsx}",
       "test/companies-http.test.ts",
       "test/tasks-http.test.ts",
       "test/search-http.test.ts",
@@ -15,6 +15,6 @@ export default defineConfig({
     environment: "node",
     passWithNoTests: false,
     restoreMocks: true,
-    sequence: { concurrent: true },
+    sequence: { concurrent: false },
   },
 });

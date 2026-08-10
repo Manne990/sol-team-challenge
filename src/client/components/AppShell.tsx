@@ -39,6 +39,9 @@ const icons: Record<string, ReactNode> = {
   tasks: (
     <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-9 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8Z" />
   ),
+  notifications: (
+    <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6v-5a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z" />
+  ),
   imports: <path d="M19 9h-4V3H9v6H5l7 7 7-7ZM5 18v2h14v-2H5Z" />,
   audit: (
     <path d="M12 2 4 5v6c0 5.05 3.41 9.74 8 11 4.59-1.26 8-5.95 8-11V5l-8-3Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 12.9a8.9 8.9 0 0 1-5-3.54c.05-1.66 3.34-2.58 5-2.58 1.65 0 4.95.92 5 2.58a8.92 8.92 0 0 1-5 3.54Z" />
@@ -55,6 +58,7 @@ const defaultNavigation: NavigationItem[] = [
   { href: "/activities", label: "Activities", icon: icons.activities },
   { href: "/deals", label: "Deals", icon: icons.deals },
   { href: "/tasks", label: "Tasks", icon: icons.tasks },
+  { href: "/notifications", label: "Notifications", icon: icons.notifications },
   { href: "/imports", label: "Imports", icon: icons.imports },
   { href: "/audit", label: "Audit", icon: icons.audit, ownerOnly: true },
   {
