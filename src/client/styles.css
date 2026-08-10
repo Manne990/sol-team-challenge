@@ -24,6 +24,35 @@
   --ns-focus: #f5a524;
   --ns-shadow: 0 12px 30px rgb(14 30 42 / 0.16);
 }
+
+.ns-pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.ns-pipeline-stage {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--ns-border);
+  border-radius: 0.5rem;
+  background: var(--ns-surface-subtle);
+}
+.ns-pipeline-stage h2 {
+  font-size: 1rem;
+  margin-top: 0;
+}
+.ns-pipeline-deal {
+  padding: 0.85rem;
+  margin-top: 0.75rem;
+  border: 1px solid var(--ns-border);
+  border-radius: 0.4rem;
+  background: var(--ns-surface);
+}
+.ns-pipeline-deal h3,
+.ns-pipeline-deal p {
+  margin: 0 0 0.4rem;
+}
 * {
   box-sizing: border-box;
 }

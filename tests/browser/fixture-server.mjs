@@ -65,6 +65,22 @@ const tasks = [
     version: 1,
   },
 ];
+const fixtureDeals = [
+  {
+    id: "deal_fixture",
+    name: "Acme expansion",
+    company: { id: "fixture-company", name: "Acme Nordic AB" },
+    owner: { id: "usr_northstar_owner", name: "Northstar Owner" },
+    amountMinor: 2500000,
+    currency: "SEK",
+    probability: 40,
+    stage: { id: "stage_lead", name: "Qualification", position: 0 },
+    status: "open",
+    lossReason: null,
+    expectedCloseDate: "2026-10-20",
+    version: 1,
+  },
+];
 
 const server = createServer((request, response) => {
   const pathname = new URL(request.url ?? "/", `http://${host}:${port}`)
@@ -184,6 +200,55 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (pathname === "/api/deals" && request.method === "GET") {
+    const stages = [
+      {
+        id: "stage_lead",
+        name: "Qualification",
+        position: 0,
+        color: "#2563eb",
+      },
+      { id: "stage_proposal", name: "Proposal", position: 1, color: "#7c3aed" },
+    ];
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        items: fixtureDeals,
+        stages: stages.map((stage) => ({
+          ...stage,
+          deals: fixtureDeals.filter((deal) => deal.stage.id === stage.id),
+        })),
+        page: 1,
+        pageSize: 20,
+        total: fixtureDeals.length,
+        totalPages: 1,
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/deals" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body);
+      const deal = {
+        ...fixtureDeals[0],
+        id: `deal_fixture_${fixtureDeals.length}`,
+        name: input.name,
+        company: { id: input.companyId, name: "Acme Nordic AB" },
+        amountMinor: input.amountMinor,
+        currency: input.currency,
+        probability: input.probability,
+        stage: { id: input.stageId, name: "Qualification", position: 0 },
+      };
+      fixtureDeals.push(deal);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify(deal));
+    });
+    return;
+  }
   if (pathname === "/api/companies" && request.method === "POST") {
     let body = "";
     request.on("data", (chunk) => {
@@ -296,10 +361,15 @@ const server = createServer((request, response) => {
   if (
     pathname === "/workspace" ||
     pathname === "/contacts" ||
+    pathname === "/tasks" ||
+    pathname === "/deals" ||
     pathname.startsWith("/assets/")
   ) {
     const relative =
-      pathname === "/workspace" || pathname === "/contacts"
+      pathname === "/workspace" ||
+      pathname === "/contacts" ||
+      pathname === "/tasks" ||
+      pathname === "/deals"
         ? "index.html"
         : normalize(pathname).replace(/^\/+/, "");
     try {
