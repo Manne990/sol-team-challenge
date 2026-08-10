@@ -9,6 +9,7 @@ import { createImportsRouter } from "../imports/router.js";
 import type { ApiError, HealthResponse } from "../shared/api.js";
 import { contactsRouter } from "./contacts/routes.js";
 import { createTasksRouter } from "../tasks/router.js";
+import { createSearchRouter } from "../search/router.js";
 
 export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
   const app = express();
@@ -32,6 +33,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/companies", createCompaniesRouter(database, secureCookies));
     app.use("/api/contacts", contactsRouter(database));
     app.use("/api/tasks", createTasksRouter(database, secureCookies));
+    app.use("/api/search", createSearchRouter(database, secureCookies));
     app.use("/api/deals", createDealsRouter(database, secureCookies));
     app.use("/api/imports", createImportsRouter(database, secureCookies));
   }

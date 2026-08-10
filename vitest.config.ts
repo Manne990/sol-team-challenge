@@ -7,6 +7,7 @@ export default defineConfig({
       "src/**/*.test.ts",
       "test/companies-http.test.ts",
       "test/tasks-http.test.ts",
+      "test/search-http.test.ts",
       "test/deals-http.test.ts",
       "test/imports-http.test.ts",
     ],
