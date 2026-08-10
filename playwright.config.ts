@@ -1,6 +1,14 @@
+import { createHash } from "node:crypto";
 import { defineConfig, devices } from "@playwright/test";
 
-const browserPort = Number(process.env.NORTHSTAR_BROWSER_PORT ?? "4317");
+const worktreePort =
+  30_000 +
+  (Number.parseInt(
+    createHash("sha256").update(process.cwd()).digest("hex").slice(0, 8),
+    16,
+  ) %
+    20_000);
+const browserPort = Number(process.env.NORTHSTAR_BROWSER_PORT ?? worktreePort);
 
 export default defineConfig({
   testDir: "tests/browser",

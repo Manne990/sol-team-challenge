@@ -11,5 +11,13 @@
     "sourceMap": true,
     "noEmit": false
   },
-  "include": ["src/auth/**/*.ts", "src/server/**/*.ts", "src/shared/**/*.ts"]
+  "include": [
+    "src/auth/**/*.ts",
+    "src/companies/**/*.ts",
+    "src/deals/**/*.ts",
+    "src/imports/**/*.ts",
+    "src/server/**/*.ts",
+    "src/shared/**/*.ts",
+    "src/tasks/**/*.ts"
+  ]
 }

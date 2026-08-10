@@ -9,6 +9,7 @@ import {
 import type { HealthResponse } from "../shared/api";
 import { AppShell, OperationalState, WorkspacePreview } from "./components";
 import { ContactsPage } from "./ContactsPage";
+import { ImportsPage } from "./ImportsPage";
 
 type State = "loading" | "ready" | "unavailable";
 type Session = {
@@ -81,6 +82,18 @@ export function App() {
         onSignOut={() => void logoutSession(setSession)}
       >
         <ContactsPage role={session.role} />
+      </AppShell>
+    );
+  if (window.location.pathname.startsWith("/imports"))
+    return (
+      <AppShell
+        currentPath="/imports"
+        role={session.role}
+        organizationName="Northstar Demo"
+        userName="Northstar user"
+        onSignOut={() => void logoutSession(setSession)}
+      >
+        <ImportsPage role={session.role} />
       </AppShell>
     );
   return (
