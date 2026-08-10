@@ -36,7 +36,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
   if (database) {
     app.use("/api/auth", createAuthRouter(database, secureCookies));
     app.use("/api/companies", createCompaniesRouter(database, secureCookies));
-    app.use("/api/contacts", contactsRouter(database));
+    app.use("/api/contacts", contactsRouter(database, secureCookies));
     app.use("/api/tasks", createTasksRouter(database, secureCookies));
     app.use("/api/search", createSearchRouter(database, secureCookies));
     app.use("/api/deals", createDealsRouter(database, secureCookies));

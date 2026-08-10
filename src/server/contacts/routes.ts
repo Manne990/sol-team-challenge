@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { Router, type Request } from "express";
-import { readSessionCookie } from "../../auth/http.js";
+import { readSessionCookie, requestHasTrustedOrigin } from "../../auth/http.js";
 import { AuthError, AuthService } from "../../auth/service.js";
 import { SqliteAuthRepository } from "../../auth/sqlite-repository.js";
 import type { Principal } from "../../auth/types.js";
@@ -120,13 +120,25 @@ const selectContact = `SELECT c.*,co.name company_name,
   LEFT JOIN memberships m ON m.user_id=c.owner_id AND m.organization_id=c.organization_id
   LEFT JOIN users u ON u.id=m.user_id`;
 
-export function contactsRouter(database: DatabaseSync) {
+export function contactsRouter(
+  database: DatabaseSync,
+  secureCookies = process.env.NODE_ENV === "production",
+) {
   const router = Router();
   const auth = new AuthService(new SqliteAuthRepository(database));
   const authenticate = async (request: Request) =>
     auth.authenticate(readSessionCookie(request.headers.cookie));
-  const mutable = (user: Principal) => {
+  const mutable = async (request: Request) => {
+    const user = await authenticate(request);
     auth.requireMutation(user);
+    if (
+      !requestHasTrustedOrigin(
+        request.header("origin"),
+        request.header("host"),
+        secureCookies,
+      )
+    )
+      throw new AuthError("forbidden", "The request origin is not allowed.");
     return user;
   };
   const existing = (organizationId: string, id: string) =>
@@ -277,7 +289,7 @@ export function contactsRouter(database: DatabaseSync) {
 
   router.post("/", async (request, response, next) => {
     try {
-      const user = mutable(await authenticate(request));
+      const user = await mutable(request);
       const input = parseInput(request.body);
       verifyRelations(user, input);
       const now = new Date().toISOString();
@@ -373,7 +385,7 @@ export function contactsRouter(database: DatabaseSync) {
 
   router.put("/:contactId", async (request, response, next) => {
     try {
-      const user = mutable(await authenticate(request));
+      const user = await mutable(request);
       const id = String(request.params.contactId);
       const before = existing(user.organizationId, id);
       if (!before)
@@ -456,7 +468,7 @@ export function contactsRouter(database: DatabaseSync) {
       next: import("express").NextFunction,
     ) => {
       try {
-        const user = mutable(await authenticate(request));
+        const user = await mutable(request);
         const id = String(request.params.contactId);
         if (!existing(user.organizationId, id))
           return response.status(404).json({
