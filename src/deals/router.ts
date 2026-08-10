@@ -362,7 +362,7 @@ export function createDealsRouter(
       );
       const rows = database
         .prepare(
-          `${selectDeal} WHERE ${clause} ORDER BY s.position,d.expected_close_date,d.id LIMIT ? OFFSET ?`,
+          `${selectDeal} WHERE ${clause} ORDER BY ${{ name: "d.name", amount: "d.amount_minor", closeDate: "d.expected_close_date", updated: "d.updated_at", stage: "s.position" }[String(request.query.sort)] ?? "s.position"} ${request.query.direction === "desc" ? "DESC" : "ASC"},d.id ${request.query.direction === "desc" ? "DESC" : "ASC"} LIMIT ? OFFSET ?`,
         )
         .all(...values, pageSize, (page - 1) * pageSize) as Row[];
       const stages = database

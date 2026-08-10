@@ -11,6 +11,7 @@ import {
 import { CompaniesPage } from "./CompaniesPage";
 import { useState } from "react";
 import { TasksPage } from "./TasksPage";
+import { SearchPage } from "./SearchPage";
 import { DealsPage } from "../DealsPage";
 
 export function WorkspacePreview({
@@ -43,6 +44,8 @@ export function WorkspacePreview({
         <CompaniesPage role={role} />
       ) : path.startsWith("/tasks") ? (
         <TasksPage role={role} userId={userId} />
+      ) : path.startsWith("/search") ? (
+        <SearchPage navigate={navigate} />
       ) : path.startsWith("/deals") ? (
         <DealsPage role={role} userId={userId} />
       ) : (
@@ -58,12 +61,18 @@ export function WorkspacePreview({
               </>
             }
           />
-          <FilterBar activeCount={1}>
+          <FilterBar activeCount={0}>
             <label className="ns-field">
               <span>Search the CRM</span>
               <TextInput
                 type="search"
                 placeholder="Company, contact, deal or task"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter")
+                    navigate(
+                      `/search?q=${encodeURIComponent(event.currentTarget.value)}`,
+                    );
+                }}
               />
             </label>
             <label className="ns-field">

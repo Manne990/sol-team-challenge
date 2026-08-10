@@ -228,6 +228,24 @@ export function createTasksRouter(
           where.push(`${column}=?`);
           values.push(String(request.query[query]));
         }
+      if (typeof request.query.status === "string" && request.query.status) {
+        where.push("t.status=?");
+        values.push(request.query.status);
+      }
+      if (
+        typeof request.query.priority === "string" &&
+        request.query.priority
+      ) {
+        where.push("t.priority=?");
+        values.push(request.query.priority);
+      }
+      if (typeof request.query.q === "string" && request.query.q.trim()) {
+        where.push(
+          "(t.title LIKE ? ESCAPE '\\' OR t.description LIKE ? ESCAPE '\\')",
+        );
+        const pattern = `%${request.query.q.trim().replace(/[\\%_]/gu, "\\$&")}%`;
+        values.push(pattern, pattern);
+      }
       const clause = where.join(" AND "),
         total = Number(
           (
@@ -238,7 +256,7 @@ export function createTasksRouter(
         ),
         rows = database
           .prepare(
-            `${select} WHERE ${clause} ORDER BY CASE t.status WHEN 'completed' THEN 1 ELSE 0 END,t.due_at,t.id LIMIT ? OFFSET ?`,
+            `${select} WHERE ${clause} ORDER BY ${{ title: "t.title", due: "t.due_at", priority: "t.priority", status: "t.status", updated: "t.updated_at" }[String(request.query.sort)] ?? "t.due_at"} ${request.query.direction === "desc" ? "DESC" : "ASC"},t.id ${request.query.direction === "desc" ? "DESC" : "ASC"} LIMIT ? OFFSET ?`,
           )
           .all(...values, pageSize, (page - 1) * pageSize) as Row[];
       response.json({

@@ -570,6 +570,83 @@ a {
   margin: 0 0 1.4rem;
   padding-left: 1.2rem;
 }
+.ns-global-search {
+  display: flex;
+  align-items: end;
+  gap: 0.7rem;
+  max-width: 1280px;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
+.ns-global-search label {
+  flex: 1;
+}
+.ns-search-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  gap: 1rem;
+  max-width: 1280px;
+  margin: auto;
+}
+.ns-search-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.ns-search-results > section,
+.ns-saved-views {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--ns-border);
+  border-radius: 7px;
+}
+.ns-search-results h2,
+.ns-saved-views h2 {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+.ns-search-results h2 small {
+  color: var(--ns-muted);
+}
+.ns-search-results ul,
+.ns-saved-views ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ns-search-results li + li,
+.ns-saved-views li + li {
+  border-top: 1px solid #e4e8eb;
+}
+.ns-search-results button,
+.ns-saved-views button {
+  width: 100%;
+  padding: 0.65rem 0;
+  color: var(--ns-teal-dark);
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.ns-search-results button small,
+.ns-saved-views button small {
+  display: block;
+  color: var(--ns-muted);
+}
+.ns-saved-views li {
+  display: flex;
+  align-items: center;
+}
+.ns-saved-views li > button:last-child {
+  width: auto;
+  padding: 0.5rem;
+  color: var(--ns-danger);
+  font-size: 1.2rem;
+}
 .ns-pagination {
   display: flex;
   align-items: center;
@@ -753,6 +830,14 @@ a {
   cursor: pointer;
 }
 @media (max-width: 760px) {
+  .ns-global-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ns-search-layout,
+  .ns-search-results {
+    grid-template-columns: 1fr;
+  }
   .ns-company-detail {
     grid-template-columns: 1fr;
     padding: 1rem;

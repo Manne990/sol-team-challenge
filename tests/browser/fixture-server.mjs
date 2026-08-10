@@ -65,6 +65,7 @@ const tasks = [
     version: 1,
   },
 ];
+const savedViews = [];
 const fixtureDeals = [
   {
     id: "deal_fixture",
@@ -327,6 +328,76 @@ const server = createServer((request, response) => {
     }
     response.writeHead(200, { "content-type": "application/json" });
     response.end(JSON.stringify(item));
+    return;
+  }
+  if (pathname === "/api/search" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        query: "Acme",
+        total: 4,
+        groups: {
+          companies: [
+            {
+              id: "fixture-company",
+              name: "Acme Nordic AB",
+              context: "Manufacturing",
+            },
+          ],
+          contacts: [
+            {
+              id: "fixture-contact",
+              name: "Alex Acme",
+              context: "Acme Nordic AB",
+            },
+          ],
+          deals: [
+            {
+              id: "fixture-deal",
+              name: "Acme renewal",
+              context: "Acme Nordic AB",
+            },
+          ],
+          tasks: [
+            {
+              id: "fixture-task",
+              name: "Call Acme",
+              context: "2026-08-09T09:00:00Z",
+            },
+          ],
+        },
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/search/views" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ items: savedViews }));
+    return;
+  }
+  if (pathname === "/api/search/views" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body),
+        view = { id: `view-${savedViews.length}`, version: 1, ...input };
+      savedViews.push(view);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify(view));
+    });
+    return;
+  }
+  if (
+    pathname.startsWith("/api/search/views/") &&
+    request.method === "DELETE"
+  ) {
+    const id = pathname.split("/").at(-1),
+      index = savedViews.findIndex((view) => view.id === id);
+    if (index >= 0) savedViews.splice(index, 1);
+    response.writeHead(204);
+    response.end();
     return;
   }
   if (pathname === "/api/contacts/contact_fixture") {
