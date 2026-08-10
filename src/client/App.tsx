@@ -86,6 +86,7 @@ export function App() {
   return (
     <WorkspacePreview
       role={session.role}
+      userId={session.userId}
       onSignOut={() => void logoutSession(setSession)}
     />
   );

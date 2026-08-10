@@ -6,6 +6,7 @@ export default defineConfig({
       "tests/unit/**/*.test.ts",
       "src/**/*.test.ts",
       "test/companies-http.test.ts",
+      "test/tasks-http.test.ts",
     ],
     environment: "node",
     passWithNoTests: false,
