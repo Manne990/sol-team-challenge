@@ -11,6 +11,7 @@ export default defineConfig({
       "test/deals-http.test.ts",
       "test/imports-http.test.ts",
       "test/activities-http.test.ts",
+      "test/duplicates-http.test.ts",
     ],
     environment: "node",
     passWithNoTests: false,

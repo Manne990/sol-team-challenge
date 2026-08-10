@@ -462,6 +462,21 @@ export function contactsRouter(database: DatabaseSync) {
           return response.status(404).json({
             error: { code: "NOT_FOUND", message: "Contact not found." },
           });
+        if (
+          restore &&
+          database
+            .prepare(
+              "SELECT 1 FROM merge_redirects WHERE organization_id=? AND entity_type='contact' AND retired_id=?",
+            )
+            .get(user.organizationId, id)
+        )
+          return response.status(409).json({
+            error: {
+              code: "MERGED_RECORD",
+              message:
+                "This contact was merged and cannot be restored. Follow its merge redirect instead.",
+            },
+          });
         const now = new Date().toISOString();
         database.exec("BEGIN IMMEDIATE");
         try {
