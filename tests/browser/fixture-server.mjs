@@ -48,6 +48,23 @@ const companies = [
     version: 1,
   },
 ];
+const tasks = [
+  {
+    id: "fixture-task",
+    title: "Review proposal",
+    description: "",
+    assigneeId: "usr_northstar_owner",
+    assigneeName: "Morgan Lee",
+    dueAt: "2026-08-09T09:00:00.000Z",
+    priority: "high",
+    status: "open",
+    dueState: "overdue",
+    companyName: "Acme Nordic AB",
+    contactName: null,
+    dealName: null,
+    version: 1,
+  },
+];
 
 const server = createServer((request, response) => {
   const pathname = new URL(request.url ?? "/", `http://${host}:${port}`)
@@ -187,6 +204,64 @@ const server = createServer((request, response) => {
       response.writeHead(201, { "content-type": "application/json" });
       response.end(JSON.stringify(company));
     });
+    return;
+  }
+  if (pathname === "/api/tasks/meta" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        members: [{ id: "usr_northstar_owner", name: "Morgan Lee" }],
+        timezone: "UTC",
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/tasks" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        items: tasks,
+        page: 1,
+        pageSize: 20,
+        total: tasks.length,
+        totalPages: 1,
+        timezone: "UTC",
+      }),
+    );
+    return;
+  }
+  if (pathname === "/api/tasks" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body),
+        task = {
+          ...tasks[0],
+          id: `fixture-task-${tasks.length}`,
+          title: input.title,
+          dueAt: input.dueAt,
+          priority: input.priority,
+          dueState: "upcoming",
+        };
+      tasks.push(task);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify(task));
+    });
+    return;
+  }
+  if (
+    pathname.match(/^\/api\/tasks\/[^/]+\/(complete|reopen)$/) &&
+    request.method === "POST"
+  ) {
+    const item = tasks.find((task) => pathname.includes(task.id));
+    if (item) {
+      item.status = pathname.endsWith("complete") ? "completed" : "open";
+      item.dueState = item.status === "completed" ? "completed" : "overdue";
+    }
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify(item));
     return;
   }
   if (pathname === "/api/contacts/contact_fixture") {

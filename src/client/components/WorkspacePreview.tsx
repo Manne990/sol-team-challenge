@@ -10,12 +10,15 @@ import {
 } from "./ui";
 import { CompaniesPage } from "./CompaniesPage";
 import { useState } from "react";
+import { TasksPage } from "./TasksPage";
 
 export function WorkspacePreview({
   role = "owner",
+  userId = "usr_northstar_owner",
   onSignOut,
 }: {
   role?: UserRole;
+  userId?: string;
   onSignOut?: () => void;
 }) {
   const [path, setPath] = useState(
@@ -37,6 +40,8 @@ export function WorkspacePreview({
     >
       {path.startsWith("/companies") ? (
         <CompaniesPage role={role} />
+      ) : path.startsWith("/tasks") ? (
+        <TasksPage role={role} userId={userId} />
       ) : (
         <>
           <PageHeader
