@@ -140,6 +140,33 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (pathname === "/api/contacts" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        contacts: [
+          {
+            id: "contact_fixture",
+            firstName: "Avery",
+            lastName: "Stone",
+            name: "Avery Stone",
+            email: "avery@example.test",
+            phone: "+46 70 123 45 67",
+            jobTitle: "Buyer",
+            status: "active",
+            tags: ["vip"],
+            communicationPreference: "email",
+            company: { id: "company_fixture", name: "Acme Nordic AB" },
+            owner: { id: "usr_northstar_owner", name: "Northstar Owner" },
+            archivedAt: null,
+            version: 1,
+          },
+        ],
+        pagination: { page: 1, pageSize: 25, total: 1, pages: 1 },
+      }),
+    );
+    return;
+  }
   if (pathname === "/api/companies" && request.method === "POST") {
     let body = "";
     request.on("data", (chunk) => {
@@ -162,9 +189,42 @@ const server = createServer((request, response) => {
     });
     return;
   }
-  if (pathname === "/workspace" || pathname.startsWith("/assets/")) {
+  if (pathname === "/api/contacts/contact_fixture") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        contact: {
+          id: "contact_fixture",
+          firstName: "Avery",
+          lastName: "Stone",
+          name: "Avery Stone",
+          email: "avery@example.test",
+          phone: "+46 70 123 45 67",
+          jobTitle: "Buyer",
+          status: "active",
+          tags: ["vip"],
+          communicationPreference: "email",
+          company: { id: "company_fixture", name: "Acme Nordic AB" },
+          owner: { id: "usr_northstar_owner", name: "Northstar Owner" },
+          archivedAt: null,
+          version: 1,
+        },
+        activities: [],
+        deals: [],
+        tasks: [],
+        history: [],
+        warnings: [],
+      }),
+    );
+    return;
+  }
+  if (
+    pathname === "/workspace" ||
+    pathname === "/contacts" ||
+    pathname.startsWith("/assets/")
+  ) {
     const relative =
-      pathname === "/workspace"
+      pathname === "/workspace" || pathname === "/contacts"
         ? "index.html"
         : normalize(pathname).replace(/^\/+/, "");
     try {
