@@ -35,7 +35,13 @@ type Contact = {
 };
 type Detail = {
   contact: Contact;
-  activities: Record<string, unknown>[];
+  activities: {
+    id: string;
+    type: string;
+    subject: string;
+    occurredAt: string;
+    creatorLabel: string;
+  }[];
   deals: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
   history: { id: string; action: string; createdAt: string }[];
@@ -328,6 +334,24 @@ export function ContactsPage({ role }: { role: Role }) {
               {detail.activities.length} activities · {detail.deals.length}{" "}
               deals · {detail.tasks.length} tasks
             </p>
+            <ul>
+              {detail.activities.map((activity) => (
+                <li key={activity.id}>
+                  <a
+                    href={`/activities?contactId=${encodeURIComponent(detail.contact.id)}`}
+                  >
+                    {activity.subject}
+                  </a>{" "}
+                  <small>
+                    {activity.type.replaceAll("_", " ")} ·{" "}
+                    {activity.creatorLabel} ·{" "}
+                    <time dateTime={activity.occurredAt}>
+                      {new Date(activity.occurredAt).toLocaleString()}
+                    </time>
+                  </small>
+                </li>
+              ))}
+            </ul>
             <ul>
               {detail.history.map((item) => (
                 <li key={item.id}>

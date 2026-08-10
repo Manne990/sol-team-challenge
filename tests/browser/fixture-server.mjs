@@ -81,6 +81,21 @@ const fixtureDeals = [
     version: 1,
   },
 ];
+const activities = [
+  {
+    id: "activity_fixture",
+    type: "call",
+    subject: "Renewal call",
+    body: "Reviewed the renewal timeline.",
+    occurredAt: "2026-08-09T13:15:00.000Z",
+    creator: { id: "usr_northstar_owner", name: "Northstar Owner" },
+    company: { id: "company_fixture", name: "Acme Nordic AB" },
+    contact: null,
+    deal: null,
+    followUpTaskId: null,
+    version: 1,
+  },
+];
 
 const server = createServer((request, response) => {
   const pathname = new URL(request.url ?? "/", `http://${host}:${port}`)
@@ -313,6 +328,19 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (pathname === "/api/activities" && request.method === "GET") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        items: activities,
+        page: 1,
+        pageSize: 25,
+        total: activities.length,
+        totalPages: 1,
+      }),
+    );
+    return;
+  }
   if (pathname === "/api/deals" && request.method === "POST") {
     let body = "";
     request.on("data", (chunk) => {
@@ -334,6 +362,47 @@ const server = createServer((request, response) => {
       response.writeHead(201, { "content-type": "application/json" });
       response.end(JSON.stringify(deal));
     });
+    return;
+  }
+  if (pathname === "/api/activities" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const input = JSON.parse(body);
+      const activity = {
+        ...activities[0],
+        id: `activity_${activities.length + 1}`,
+        type: input.type,
+        subject: input.subject,
+        body: input.body,
+        occurredAt: input.occurredAt,
+        company: null,
+        followUpTaskId: null,
+      };
+      activities.unshift(activity);
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(
+        JSON.stringify({ ...activity, participants: [], followUpTask: null }),
+      );
+    });
+    return;
+  }
+  if (pathname.startsWith("/api/activities/") && request.method === "GET") {
+    const activity = activities.find(
+      (item) => item.id === pathname.split("/").at(-1),
+    );
+    response.writeHead(activity ? 200 : 404, {
+      "content-type": "application/json",
+    });
+    response.end(
+      JSON.stringify(
+        activity
+          ? { ...activity, participants: [] }
+          : { error: { message: "Activity not found." } },
+      ),
+    );
     return;
   }
   if (pathname === "/api/companies" && request.method === "POST") {
@@ -451,6 +520,7 @@ const server = createServer((request, response) => {
     pathname === "/tasks" ||
     pathname === "/deals" ||
     pathname === "/imports" ||
+    pathname === "/activities" ||
     pathname.startsWith("/assets/")
   ) {
     const relative =
@@ -458,7 +528,8 @@ const server = createServer((request, response) => {
       pathname === "/contacts" ||
       pathname === "/tasks" ||
       pathname === "/deals" ||
-      pathname === "/imports"
+      pathname === "/imports" ||
+      pathname === "/activities"
         ? "index.html"
         : normalize(pathname).replace(/^\/+/, "");
     try {

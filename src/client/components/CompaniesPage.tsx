@@ -38,6 +38,13 @@ type Company = {
 type CompanyDetail = Company & {
   related: Record<"contacts" | "activities" | "deals" | "tasks", number>;
   history: { action: string; occurredAt: string }[];
+  activities: {
+    id: string;
+    type: string;
+    subject: string;
+    occurredAt: string;
+    creatorLabel: string;
+  }[];
 };
 type Page = {
   items: Company[];
@@ -441,6 +448,29 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
               </li>
             ))}
           </ul>
+          <h2>Shared activity history</h2>
+          {item.activities.length ? (
+            <ol>
+              {item.activities.map((activity) => (
+                <li key={activity.id}>
+                  <a
+                    href={`/activities?companyId=${encodeURIComponent(item.id)}`}
+                  >
+                    {activity.subject}
+                  </a>{" "}
+                  <small>
+                    {activity.type.replaceAll("_", " ")} ·{" "}
+                    {activity.creatorLabel} ·{" "}
+                    <time dateTime={activity.occurredAt}>
+                      {new Date(activity.occurredAt).toLocaleString()}
+                    </time>
+                  </small>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>No activities recorded.</p>
+          )}
           <h2>Change history</h2>
           {item.history.length ? (
             <ol>

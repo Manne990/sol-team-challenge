@@ -10,6 +10,7 @@ import type { HealthResponse } from "../shared/api";
 import { AppShell, OperationalState, WorkspacePreview } from "./components";
 import { ContactsPage } from "./ContactsPage";
 import { ImportsPage } from "./ImportsPage";
+import { ActivitiesPage } from "./ActivitiesPage";
 
 type State = "loading" | "ready" | "unavailable";
 type Session = {
@@ -94,6 +95,18 @@ export function App() {
         onSignOut={() => void logoutSession(setSession)}
       >
         <ImportsPage role={session.role} />
+      </AppShell>
+    );
+  if (window.location.pathname.startsWith("/activities"))
+    return (
+      <AppShell
+        currentPath="/activities"
+        role={session.role}
+        organizationName="Northstar Demo"
+        userName="Northstar user"
+        onSignOut={() => void logoutSession(setSession)}
+      >
+        <ActivitiesPage role={session.role} userId={session.userId} />
       </AppShell>
     );
   return (
