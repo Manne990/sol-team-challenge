@@ -420,6 +420,30 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (
+    pathname === "/api/companies/fixture-company" &&
+    request.method === "GET"
+  ) {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      JSON.stringify({
+        ...companies[0],
+        related: { contacts: 1, activities: 1, deals: 1, tasks: 1 },
+        history: [],
+        activities: [],
+      }),
+    );
+    return;
+  }
+  if (
+    pathname === "/api/companies/fixture-company/archive" &&
+    request.method === "POST"
+  ) {
+    companies[0].archivedAt = new Date().toISOString();
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify(companies[0]));
+    return;
+  }
   if (pathname === "/api/contacts" && request.method === "GET") {
     response.writeHead(200, { "content-type": "application/json" });
     response.end(
@@ -730,23 +754,26 @@ const server = createServer((request, response) => {
     return;
   }
   if (
-    pathname === "/workspace" ||
-    pathname === "/contacts" ||
-    pathname === "/tasks" ||
-    pathname === "/deals" ||
-    pathname === "/imports" ||
-    pathname === "/activities" ||
+    [
+      "/workspace",
+      "/companies",
+      "/contacts",
+      "/tasks",
+      "/deals",
+      "/imports",
+      "/activities",
+      "/notifications",
+      "/admin",
+      "/audit",
+      "/search",
+    ].includes(pathname) ||
+    pathname.startsWith("/companies/") ||
+    pathname.startsWith("/contacts/") ||
     pathname.startsWith("/assets/")
   ) {
-    const relative =
-      pathname === "/workspace" ||
-      pathname === "/contacts" ||
-      pathname === "/tasks" ||
-      pathname === "/deals" ||
-      pathname === "/imports" ||
-      pathname === "/activities"
-        ? "index.html"
-        : normalize(pathname).replace(/^\/+/, "");
+    const relative = pathname.startsWith("/assets/")
+      ? normalize(pathname).replace(/^\/+/, "")
+      : "index.html";
     try {
       const file = join(clientRoot, relative);
       const body = readFileSync(file);
