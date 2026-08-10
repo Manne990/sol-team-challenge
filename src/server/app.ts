@@ -39,10 +39,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/deals", createDealsRouter(database, secureCookies));
     app.use("/api/imports", createImportsRouter(database, secureCookies));
     app.use("/api/activities", createActivitiesRouter(database, secureCookies));
-    app.use(
-      "/api/notifications",
-      notificationsRouter(database, secureCookies),
-    );
+    app.use("/api/notifications", notificationsRouter(database, secureCookies));
   }
   app.use("/api", (_request, response) => {
     const body: ApiError = {
