@@ -41,6 +41,70 @@ const server = createServer((request, response) => {
     );
     return;
   }
+  if (pathname === "/api/auth/session" && request.method === "GET") {
+    const authenticated =
+      request.headers.cookie?.includes("northstar_session=fixture") ?? false;
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(
+      authenticated
+        ? JSON.stringify({
+            authenticated: true,
+            userId: "usr_northstar_owner",
+            organizationId: "org_northstar_demo",
+            role: "owner",
+            expiresAt: "2026-08-11T00:00:00.000Z",
+          })
+        : JSON.stringify({ authenticated: false }),
+    );
+    return;
+  }
+  if (pathname === "/api/auth/session" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      const credentials = JSON.parse(body);
+      if (
+        credentials.email !== "owner@northstar.test" ||
+        credentials.password !== "OwnerPass!2026"
+      ) {
+        response.writeHead(401, { "content-type": "application/json" });
+        response.end(
+          JSON.stringify({
+            error: {
+              code: "invalid_credentials",
+              message: "The email or password is incorrect.",
+            },
+          }),
+        );
+        return;
+      }
+      response.writeHead(201, {
+        "content-type": "application/json",
+        "set-cookie":
+          "northstar_session=fixture; Path=/; HttpOnly; SameSite=Lax",
+      });
+      response.end(
+        JSON.stringify({
+          authenticated: true,
+          userId: "usr_northstar_owner",
+          organizationId: "org_northstar_demo",
+          role: "owner",
+          expiresAt: "2026-08-11T00:00:00.000Z",
+        }),
+      );
+    });
+    return;
+  }
+  if (pathname === "/api/auth/session" && request.method === "DELETE") {
+    response.writeHead(204, {
+      "set-cookie":
+        "northstar_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+    });
+    response.end();
+    return;
+  }
   if (pathname === "/workspace" || pathname.startsWith("/assets/")) {
     const relative =
       pathname === "/workspace"

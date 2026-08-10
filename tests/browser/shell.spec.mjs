@@ -8,10 +8,19 @@ const viewports = [
   { name: "mobile", width: 390, height: 844 },
 ];
 
+async function signIn(page) {
+  await page.goto("/workspace");
+  await page.getByLabel("Email").fill("owner@northstar.test");
+  await page.getByLabel("Password").fill("OwnerPass!2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+}
+
 for (const viewport of viewports) {
   test(`CRM shell is accessible and contained at the ${viewport.name} viewport`, async ({
     page,
   }) => {
+    await signIn(page);
     await page.setViewportSize(viewport);
     await page.goto("/workspace");
     await expect(
@@ -30,6 +39,7 @@ for (const viewport of viewports) {
 test("mobile navigation opens, identifies the current page, and closes with Escape", async ({
   page,
 }) => {
+  await signIn(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/workspace");
   const trigger = page.getByRole("button", { name: "Open navigation" });
