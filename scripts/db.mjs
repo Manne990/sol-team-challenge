@@ -1,4 +1,4 @@
-import { scryptSync } from "node:crypto";
+import bcrypt from "bcryptjs";
 import { openDatabase, migrate, resetDatabase } from "./database.mjs";
 
 const command = process.argv[2];
@@ -9,8 +9,7 @@ if (command === "reset") {
   const db = openDatabase();
   migrate(db);
   const now = "2026-08-10T08:00:00.000Z";
-  const hash = (password, salt) =>
-    `scrypt:${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
+  const hash = (password) => bcrypt.hashSync(password, 12);
   const run = db.prepare.bind(db);
   db.exec("BEGIN IMMEDIATE");
   try {
