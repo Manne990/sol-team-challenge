@@ -261,6 +261,11 @@ export function createCompaniesRouter(
           "SELECT action,summary_json,occurred_at FROM audit_events WHERE organization_id=? AND entity_type='company' AND entity_id=? ORDER BY occurred_at DESC,id DESC LIMIT 25",
         )
         .all(person.organizationId, request.params.id) as Row[];
+      const activities = database
+        .prepare(
+          "SELECT id,type,subject,body,occurred_at,creator_name_snapshot FROM activities WHERE organization_id=? AND company_id=? ORDER BY occurred_at DESC,id DESC LIMIT 50",
+        )
+        .all(person.organizationId, request.params.id) as Row[];
       response.json({
         ...company(row),
         related: {
@@ -273,6 +278,14 @@ export function createCompaniesRouter(
           action: String(x.action),
           summary: JSON.parse(String(x.summary_json)),
           occurredAt: String(x.occurred_at),
+        })),
+        activities: activities.map((activity) => ({
+          id: String(activity.id),
+          type: String(activity.type),
+          subject: String(activity.subject),
+          body: String(activity.body),
+          occurredAt: String(activity.occurred_at),
+          creatorLabel: String(activity.creator_name_snapshot),
         })),
       });
     } catch (error) {

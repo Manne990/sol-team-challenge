@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import express, { type ErrorRequestHandler } from "express";
+import { createActivitiesRouter } from "../activities/router.js";
 import { createAuthRouter } from "../auth/router.js";
 import { AuthError } from "../auth/service.js";
 import { createCompaniesRouter } from "../companies/router.js";
@@ -36,6 +37,7 @@ export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
     app.use("/api/search", createSearchRouter(database, secureCookies));
     app.use("/api/deals", createDealsRouter(database, secureCookies));
     app.use("/api/imports", createImportsRouter(database, secureCookies));
+    app.use("/api/activities", createActivitiesRouter(database, secureCookies));
   }
   app.use("/api", (_request, response) => {
     const body: ApiError = {

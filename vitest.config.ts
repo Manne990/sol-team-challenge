@@ -10,6 +10,7 @@ export default defineConfig({
       "test/search-http.test.ts",
       "test/deals-http.test.ts",
       "test/imports-http.test.ts",
+      "test/activities-http.test.ts",
     ],
     environment: "node",
     passWithNoTests: false,
