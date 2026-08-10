@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
+import type { DatabaseSync } from "node:sqlite";
 import express, { type ErrorRequestHandler } from "express";
+import { createAuthRouter } from "../auth/router.js";
 import type { ApiError, HealthResponse } from "../shared/api.js";
 
-export function createApp() {
+export function createApp(database?: DatabaseSync, secureCookies?: boolean) {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
@@ -19,6 +21,7 @@ export function createApp() {
     };
     response.json(body);
   });
+  if (database) app.use("/api/auth", createAuthRouter(database, secureCookies));
   app.use("/api", (_request, response) => {
     const body: ApiError = {
       error: {

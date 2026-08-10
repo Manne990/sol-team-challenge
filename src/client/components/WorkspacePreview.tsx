@@ -9,7 +9,13 @@ import {
   TextInput,
 } from "./ui";
 
-export function WorkspacePreview({ role = "owner" }: { role?: UserRole }) {
+export function WorkspacePreview({
+  role = "owner",
+  onSignOut,
+}: {
+  role?: UserRole;
+  onSignOut?: () => void;
+}) {
   return (
     <AppShell
       currentPath="/"
@@ -17,6 +23,7 @@ export function WorkspacePreview({ role = "owner" }: { role?: UserRole }) {
       organizationName="Northstar Demo"
       userName="Morgan Lee"
       userEmail="owner@northstar.test"
+      onSignOut={onSignOut}
     >
       <PageHeader
         eyebrow="Today"

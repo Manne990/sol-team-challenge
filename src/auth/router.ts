@@ -49,14 +49,12 @@ export function createAuthRouter(
         secureCookies,
       )
     ) {
-      response
-        .status(403)
-        .json({
-          error: {
-            code: "forbidden",
-            message: "The request origin is not allowed.",
-          },
-        });
+      response.status(403).json({
+        error: {
+          code: "forbidden",
+          message: "The request origin is not allowed.",
+        },
+      });
       return;
     }
     next();
@@ -80,14 +78,13 @@ export function createAuthRouter(
         "set-cookie",
         sessionCookie(signedIn.token, EIGHT_HOURS_SECONDS, secureCookies),
       );
-      response
-        .status(201)
-        .json({
-          userId: signedIn.principal.userId,
-          organizationId: signedIn.principal.organizationId,
-          role: signedIn.principal.role,
-          expiresAt: signedIn.principal.expiresAt,
-        });
+      response.status(201).json({
+        authenticated: true,
+        userId: signedIn.principal.userId,
+        organizationId: signedIn.principal.organizationId,
+        role: signedIn.principal.role,
+        expiresAt: signedIn.principal.expiresAt,
+      });
     } catch (error) {
       if (error instanceof AuthError) errorResponse(error, response);
       else throw error;
@@ -96,10 +93,14 @@ export function createAuthRouter(
 
   router.get("/session", async (request, response) => {
     try {
-      const principal = await service.authenticate(
-        readSessionCookie(request.header("cookie")),
-      );
+      const token = readSessionCookie(request.header("cookie"));
+      if (!token) {
+        response.json({ authenticated: false });
+        return;
+      }
+      const principal = await service.authenticate(token);
       response.json({
+        authenticated: true,
         userId: principal.userId,
         organizationId: principal.organizationId,
         role: principal.role,
