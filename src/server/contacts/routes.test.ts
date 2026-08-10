@@ -134,10 +134,47 @@ async function signIn(email: string, password: string) {
 const request = (path: string, cookie: string, init: RequestInit = {}) =>
   fetch(`${baseUrl}${path}`, {
     ...init,
-    headers: { "content-type": "application/json", cookie, ...init.headers },
+    headers: {
+      "content-type": "application/json",
+      cookie,
+      origin: baseUrl,
+      ...init.headers,
+    },
   });
 
 describe.sequential("contact API", () => {
+  it("rejects cross-origin mutations without side effects", async () => {
+    const cookie = await signIn("owner@northstar.test", "OwnerPass!2026");
+    const before = Number(
+      (
+        database.prepare("SELECT count(*) count FROM contacts").get() as {
+          count: number;
+        }
+      ).count,
+    );
+    const response = await request("/api/contacts", cookie, {
+      method: "POST",
+      headers: { origin: "https://evil.example" },
+      body: JSON.stringify({
+        firstName: "CrossOrigin",
+        lastName: "Rejected",
+        tags: [],
+      }),
+    });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({
+      error: { code: "forbidden" },
+    });
+    const after = Number(
+      (
+        database.prepare("SELECT count(*) count FROM contacts").get() as {
+          count: number;
+        }
+      ).count,
+    );
+    expect(after).toBe(before);
+  });
+
   it("paginates and combines organization-scoped filters", async () => {
     const cookie = await signIn("owner@northstar.test", "OwnerPass!2026");
     const response = await request(
