@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-const roots = ["tests/unit", "tests/browser"];
+const roots = ["src", "test", "tests"];
 const forbidden =
   /\b(?:describe|it|test)\s*\.\s*(?:only|skip|todo|fixme)\b|\b(?:xdescribe|xit|xtest)\s*\(/;
 let suites = 0;
@@ -20,6 +20,8 @@ async function inspect(directory) {
 }
 
 for (const root of roots) await inspect(root);
-if (suites < roots.length)
-  throw new Error("Unit and browser suites must both be non-empty");
+if (suites < 3)
+  throw new Error(
+    "Server, unit, and browser test inventories must be non-empty",
+  );
 console.log(`Test policy accepted ${suites} suite files.`);

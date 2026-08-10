@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   Button,
+  ConfirmDialog,
   DataTable,
   Dialog,
   Field,
@@ -43,6 +44,7 @@ export function AdminPage({ auditOnly = false }: { auditOnly?: boolean }) {
       "loading",
     ),
     [open, setOpen] = useState(false),
+    [revokeTarget, setRevokeTarget] = useState<Member | null>(null),
     [message, setMessage] = useState("");
   const load = useCallback(async () => {
     setState("loading");
@@ -110,6 +112,7 @@ export function AdminPage({ auditOnly = false }: { auditOnly?: boolean }) {
       method: "DELETE",
     });
     if (response.ok) {
+      setRevokeTarget(null);
       setMessage("Access revoked");
       await load();
     } else
@@ -291,7 +294,7 @@ export function AdminPage({ auditOnly = false }: { auditOnly?: boolean }) {
                     <Button
                       variant="danger"
                       disabled={member.self}
-                      onClick={() => void revoke(member)}
+                      onClick={() => setRevokeTarget(member)}
                     >
                       Revoke
                     </Button>
@@ -342,6 +345,15 @@ export function AdminPage({ auditOnly = false }: { auditOnly?: boolean }) {
           </div>
         </form>
       </Dialog>
+      <ConfirmDialog
+        open={Boolean(revokeTarget)}
+        title={`Revoke ${revokeTarget?.name ?? "member"}?`}
+        consequences="This immediately removes organization access and revokes every active session for this member. Existing audit history remains preserved."
+        confirmLabel="Revoke access"
+        danger
+        onClose={() => setRevokeTarget(null)}
+        onConfirm={() => revokeTarget && void revoke(revokeTarget)}
+      />
       {message && (
         <ToastRegion>
           <Toast

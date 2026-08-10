@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { UserRole } from "./AppShell";
 import {
   Button,
+  ConfirmDialog,
   DataTable,
   Dialog,
   Field,
@@ -306,6 +307,7 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
     "loading" | "ready" | "not-found" | "error"
   >("loading");
   const [editing, setEditing] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const [message, setMessage] = useState("");
   const load = useCallback(async () => {
     setState("loading");
@@ -372,6 +374,7 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
       },
     );
     if (response.ok) {
+      setConfirmArchive(false);
       setMessage(item.archivedAt ? "Company restored" : "Company archived");
       await load();
     }
@@ -407,7 +410,9 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
                 </Button>
                 <Button
                   variant={item.archivedAt ? "secondary" : "danger"}
-                  onClick={() => void archive()}
+                  onClick={() =>
+                    item.archivedAt ? void archive() : setConfirmArchive(true)
+                  }
                 >
                   {item.archivedAt ? "Restore" : "Archive"}
                 </Button>
@@ -571,6 +576,15 @@ function CompanyDetailPage({ id, role }: { id: string; role: UserRole }) {
           </div>
         </form>
       </Dialog>
+      <ConfirmDialog
+        open={confirmArchive}
+        title={`Archive ${item.name}?`}
+        consequences={`The company will leave active lists. Its ${item.related.contacts} contacts, ${item.related.deals} deals, ${item.related.tasks} tasks, and ${item.related.activities} historical activities remain preserved.`}
+        confirmLabel="Archive company"
+        danger
+        onClose={() => setConfirmArchive(false)}
+        onConfirm={() => void archive()}
+      />
       {message && (
         <ToastRegion>
           <Toast
