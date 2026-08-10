@@ -1,23 +1,107 @@
 // @vitest-environment node
 import { createServer, type Server } from "node:http";
+import { readFileSync, readdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { DatabaseSync } from "node:sqlite";
+import bcrypt from "bcryptjs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { seedDatabase } from "../../db/seed.mjs";
 import { createApp } from "../app.js";
-import { openProductDatabase } from "../database.js";
 
-type Database = ReturnType<typeof openProductDatabase>;
-let database: Database;
+let database: DatabaseSync;
 let server: Server;
 let baseUrl: string;
 
 beforeEach(async () => {
-  database = openProductDatabase(":memory:");
-  seedDatabase(database);
+  database = new DatabaseSync(":memory:");
+  database.exec("PRAGMA foreign_keys=ON");
+  for (const file of readdirSync(resolve("db/migrations"))
+    .filter((name) => name.endsWith(".sql"))
+    .sort())
+    database.exec(readFileSync(resolve("db/migrations", file), "utf8"));
+  const now = "2026-08-10T08:00:00.000Z";
+  const addOrganization = database.prepare(
+    "INSERT INTO organizations(id,name,slug,created_at,updated_at) VALUES (?,?,?,?,?)",
+  );
+  addOrganization.run("org_northstar_demo", "Northstar", "northstar", now, now);
+  addOrganization.run("org_outside_demo", "Outside", "outside", now, now);
+  const addUser = database.prepare(
+    "INSERT INTO users(id,email,password_hash,display_name,created_at,updated_at) VALUES (?,?,?,?,?,?)",
+  );
+  for (const [id, email, password, name] of [
+    ["usr_northstar_owner", "owner@northstar.test", "OwnerPass!2026", "Owner"],
+    [
+      "usr_northstar_member",
+      "member@northstar.test",
+      "MemberPass!2026",
+      "Member",
+    ],
+    [
+      "usr_northstar_viewer",
+      "viewer@northstar.test",
+      "ViewerPass!2026",
+      "Viewer",
+    ],
+    [
+      "usr_outside_owner",
+      "other-owner@outside.test",
+      "OutsidePass!2026",
+      "Outside",
+    ],
+  ] as const)
+    addUser.run(id, email, await bcrypt.hash(password, 4), name, now, now);
+  const addMembership = database.prepare(
+    "INSERT INTO memberships(organization_id,user_id,role,created_at) VALUES (?,?,?,?)",
+  );
+  addMembership.run("org_northstar_demo", "usr_northstar_owner", "owner", now);
+  addMembership.run(
+    "org_northstar_demo",
+    "usr_northstar_member",
+    "member",
+    now,
+  );
+  addMembership.run(
+    "org_northstar_demo",
+    "usr_northstar_viewer",
+    "viewer",
+    now,
+  );
+  addMembership.run("org_outside_demo", "usr_outside_owner", "owner", now);
+  database
+    .prepare(
+      "INSERT INTO companies(id,organization_id,name,created_at,updated_at) VALUES (?,?,?,?,?)",
+    )
+    .run(
+      "cmp_0001_northstar",
+      "org_northstar_demo",
+      "Northstar Account 1",
+      now,
+      now,
+    );
+  const addContact = database.prepare(
+    `INSERT INTO contacts
+      (id,organization_id,company_id,first_name,last_name,email,owner_id,status,tags_json,communication_preference,created_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
+  );
+  for (let index = 1; index <= 8; index++)
+    addContact.run(
+      `con_000${index}_northstar`,
+      "org_northstar_demo",
+      "cmp_0001_northstar",
+      `Person${index}`,
+      "Northstar",
+      `contact${index}@example.test`,
+      "usr_northstar_owner",
+      "active",
+      '["vip"]',
+      "email",
+      now,
+      now,
+    );
   database
     .prepare(
       `INSERT INTO contacts
     (id,organization_id,first_name,last_name,email,status,tags_json,communication_preference,created_at,updated_at)
-    VALUES('con_outside','org_outside','Private','Person','private@outside.test','active','[]','email','2026-08-05T12:00:00Z','2026-08-05T12:00:00Z')`,
+    VALUES('con_outside','org_outside_demo','Private','Person','private@outside.test','active','[]','email','2026-08-05T12:00:00Z','2026-08-05T12:00:00Z')`,
     )
     .run();
   server = createServer(createApp(database));
@@ -38,10 +122,10 @@ afterEach(async () => {
 async function signIn(email: string, password: string) {
   const response = await fetch(`${baseUrl}/api/auth/session`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", origin: baseUrl },
     body: JSON.stringify({ email, password }),
   });
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(201);
   const cookie = response.headers.get("set-cookie")?.split(";", 1)[0];
   if (!cookie) throw new Error("session cookie missing");
   return cookie;
@@ -53,7 +137,7 @@ const request = (path: string, cookie: string, init: RequestInit = {}) =>
     headers: { "content-type": "application/json", cookie, ...init.headers },
   });
 
-describe("contact API", () => {
+describe.sequential("contact API", () => {
   it("paginates and combines organization-scoped filters", async () => {
     const cookie = await signIn("owner@northstar.test", "OwnerPass!2026");
     const response = await request(
@@ -87,7 +171,7 @@ describe("contact API", () => {
         email: " CONTACT1@EXAMPLE.TEST ",
         phone: "+46 70 123",
         jobTitle: "Buyer",
-        ownerMembershipId: "mem_member",
+        ownerMembershipId: "usr_northstar_member",
         companyId: "cmp_0001_northstar",
         status: "active",
         tags: ["VIP", "vip"],
@@ -124,7 +208,7 @@ describe("contact API", () => {
           ...created.contact,
           firstName: "Updated",
           tags: ["customer"],
-          ownerMembershipId: "mem_owner",
+          ownerMembershipId: "usr_northstar_owner",
           companyId: null,
         }),
       },

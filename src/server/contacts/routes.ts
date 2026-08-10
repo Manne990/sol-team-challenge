@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { Router, type Request } from "express";
 import { readSessionCookie } from "../../auth/http.js";
 import { AuthError, AuthService } from "../../auth/service.js";
@@ -32,8 +32,7 @@ const text = (value: unknown, maximum: number, required = false) => {
     throw validation("Check the contact field lengths and try again.");
   return normalized || null;
 };
-const validation = (message: string) =>
-  new AuthError("validation", message);
+const validation = (message: string) => new AuthError("validation", message);
 
 function parseInput(body: unknown): ContactInput {
   if (!body || typeof body !== "object")
@@ -141,7 +140,10 @@ export function contactsRouter(database: DatabaseSync) {
         .prepare("SELECT 1 FROM companies WHERE id=? AND organization_id=?")
         .get(input.companyId, user.organizationId)
     )
-      throw new AuthError("unauthenticated", "The requested record was not found.");
+      throw new AuthError(
+        "unauthenticated",
+        "The requested record was not found.",
+      );
     if (
       input.ownerMembershipId &&
       !database
@@ -211,7 +213,7 @@ export function contactsRouter(database: DatabaseSync) {
         ),
       );
       const conditions = ["c.organization_id=?"];
-      const parameters: unknown[] = [user.organizationId];
+      const parameters: SQLInputValue[] = [user.organizationId];
       if (request.query.archived !== "true")
         conditions.push("c.archived_at IS NULL");
       for (const [query, column] of [

@@ -7,7 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import type { HealthResponse } from "../shared/api";
-import { OperationalState, WorkspacePreview } from "./components";
+import { AppShell, OperationalState, WorkspacePreview } from "./components";
+import { ContactsPage } from "./ContactsPage";
 
 type State = "loading" | "ready" | "unavailable";
 type Session = {
@@ -69,6 +70,18 @@ export function App() {
           <SignIn onSignedIn={setSession} />
         </section>
       </main>
+    );
+  if (window.location.pathname.startsWith("/contacts"))
+    return (
+      <AppShell
+        currentPath="/contacts"
+        role={session.role}
+        organizationName="Northstar Demo"
+        userName="Northstar user"
+        onSignOut={() => void logoutSession(setSession)}
+      >
+        <ContactsPage role={session.role} />
+      </AppShell>
     );
   return (
     <WorkspacePreview
