@@ -6,15 +6,11 @@ async function session(page) {
       ? route.fulfill({
           contentType: "application/json",
           body: JSON.stringify({
-            user: {
-              id: "user-member",
-              membershipId: "mem-member",
-              email: "member@northstar.test",
-              name: "Morgan Member",
-              role: "member",
-              organization: { id: "org-northstar", name: "Northstar Demo" },
-              sessionExpiresAt: "2026-08-10T08:00:00.000Z",
-            },
+            authenticated: true,
+            userId: "user-member",
+            organizationId: "org-northstar",
+            role: "member",
+            expiresAt: "2026-08-11T08:00:00.000Z",
           }),
         })
       : route.continue(),

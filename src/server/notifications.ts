@@ -48,7 +48,7 @@ export class NotificationStore {
         entityType,
         entityId,
         createdAt,
-      ) as Row;
+      );
       created += Number(result.changes ?? 0);
     };
     const tasks = this.db
@@ -181,7 +181,7 @@ export class NotificationStore {
       .prepare(
         "UPDATE notifications SET read_at=coalesce(read_at,?) WHERE id=? AND organization_id=? AND recipient_id=?",
       )
-      .run(now, id, user.organizationId, user.userId) as Row;
+      .run(now, id, user.organizationId, user.userId);
     if (Number(result.changes ?? 0) === 0)
       throw new AuthError("unauthenticated", "Notification not found.");
     return this.json(
@@ -197,11 +197,7 @@ export class NotificationStore {
       .prepare(
         "UPDATE notifications SET read_at=? WHERE organization_id=? AND recipient_id=? AND read_at IS NULL",
       )
-      .run(
-        this.clock().toISOString(),
-        user.organizationId,
-        user.userId,
-      ) as Row;
+      .run(this.clock().toISOString(), user.organizationId, user.userId);
     return { updated: Number(result.changes ?? 0) };
   }
   private json = (row: Row) => ({
