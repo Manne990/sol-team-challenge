@@ -11,6 +11,7 @@ import {
 import { CompaniesPage } from "./CompaniesPage";
 import { useState } from "react";
 import { TasksPage } from "./TasksPage";
+import { DealsPage } from "../DealsPage";
 
 export function WorkspacePreview({
   role = "owner",
@@ -42,6 +43,8 @@ export function WorkspacePreview({
         <CompaniesPage role={role} />
       ) : path.startsWith("/tasks") ? (
         <TasksPage role={role} userId={userId} />
+      ) : path.startsWith("/deals") ? (
+        <DealsPage role={role} userId={userId} />
       ) : (
         <>
           <PageHeader
