@@ -1,0 +1,5 @@
+docs/product-contract.md
+scripts/baseline.mjs
+scripts/database.mjs
+scripts/db.mjs
+tests/database.test.mjs
