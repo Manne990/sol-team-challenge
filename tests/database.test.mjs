@@ -37,12 +37,13 @@ test("migrations are repeatable and create the complete schema", () => {
       "saved_views",
       "imports",
       "merge_redirects",
+      "merge_operations",
       "audit_events",
     ])
       assert.ok(tables.includes(name), name);
     assert.equal(
       db.prepare("SELECT count(*) AS n FROM schema_migrations").get().n,
-      3,
+      4,
     );
     db.close();
   } finally {

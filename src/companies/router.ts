@@ -443,6 +443,19 @@ export function createCompaniesRouter(
           "NOT_FOUND",
           "The requested company was not found.",
         );
+      if (
+        action === "restore" &&
+        database
+          .prepare(
+            "SELECT 1 FROM merge_redirects WHERE organization_id=? AND entity_type='company' AND retired_id=?",
+          )
+          .get(person.organizationId, request.params.id)
+      )
+        throw new CompanyError(
+          409,
+          "MERGED_RECORD",
+          "This company was merged and cannot be restored. Follow its merge redirect instead.",
+        );
       const now = new Date().toISOString(),
         archived = action === "archive" ? now : null;
       database.exec("BEGIN IMMEDIATE");
